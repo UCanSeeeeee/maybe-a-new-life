@@ -2,6 +2,10 @@
 
 - git
 
+cli 和 gui
+gh和git
+pull request
+
 - python + 算法
 
 - iOS 各种机制
