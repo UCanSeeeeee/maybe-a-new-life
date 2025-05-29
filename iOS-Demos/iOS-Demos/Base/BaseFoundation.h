@@ -10,6 +10,7 @@
 
 #import "YYCategories.h"
 #import <libextobjc/extobjc.h>
+#import <AFNetworking/AFNetworking.h>
 
 // 顶部安全区域高度（包含刘海或灵动岛）
 #define SafeAreaTopHeight ({\

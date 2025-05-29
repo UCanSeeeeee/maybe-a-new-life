@@ -13,6 +13,9 @@
 		D1102C572DE31875000AB7B1 /* SettingItemModel.m in Sources */ = {isa = PBXBuildFile; fileRef = D1102C562DE31875000AB7B1 /* SettingItemModel.m */; };
 		D1102C5B2DE320D7000AB7B1 /* SettingPopupView.m in Sources */ = {isa = PBXBuildFile; fileRef = D1102C5A2DE320D7000AB7B1 /* SettingPopupView.m */; };
 		D1102C5E2DE32169000AB7B1 /* HomeViewController+Action.m in Sources */ = {isa = PBXBuildFile; fileRef = D1102C5D2DE32169000AB7B1 /* HomeViewController+Action.m */; };
+		D1102C612DE8AB38000AB7B1 /* InfoPanelView.m in Sources */ = {isa = PBXBuildFile; fileRef = D1102C602DE8AB38000AB7B1 /* InfoPanelView.m */; };
+		D1102C652DE8AB6D000AB7B1 /* ScanViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D1102C642DE8AB6D000AB7B1 /* ScanViewController.m */; };
+		D1102C682DE8AC30000AB7B1 /* ScanViewController+deepseek.m in Sources */ = {isa = PBXBuildFile; fileRef = D1102C672DE8AC30000AB7B1 /* ScanViewController+deepseek.m */; };
 		D13199BA2DE0D3130083B629 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = D13199AD2DE0D3130083B629 /* AppDelegate.m */; };
 		D13199BB2DE0D3130083B629 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = D13199B22DE0D3130083B629 /* main.m */; };
 		D13199BD2DE0D3130083B629 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D13199B82DE0D3130083B629 /* ViewController.m */; };
@@ -31,6 +34,12 @@
 		D1102C5A2DE320D7000AB7B1 /* SettingPopupView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SettingPopupView.m; sourceTree = "<group>"; };
 		D1102C5C2DE32169000AB7B1 /* HomeViewController+Action.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "HomeViewController+Action.h"; sourceTree = "<group>"; };
 		D1102C5D2DE32169000AB7B1 /* HomeViewController+Action.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "HomeViewController+Action.m"; sourceTree = "<group>"; };
+		D1102C5F2DE8AB38000AB7B1 /* InfoPanelView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = InfoPanelView.h; sourceTree = "<group>"; };
+		D1102C602DE8AB38000AB7B1 /* InfoPanelView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = InfoPanelView.m; sourceTree = "<group>"; };
+		D1102C632DE8AB6D000AB7B1 /* ScanViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ScanViewController.h; sourceTree = "<group>"; };
+		D1102C642DE8AB6D000AB7B1 /* ScanViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ScanViewController.m; sourceTree = "<group>"; };
+		D1102C662DE8AC30000AB7B1 /* ScanViewController+deepseek.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ScanViewController+deepseek.h"; sourceTree = "<group>"; };
+		D1102C672DE8AC30000AB7B1 /* ScanViewController+deepseek.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "ScanViewController+deepseek.m"; sourceTree = "<group>"; };
 		D13199AC2DE0D3130083B629 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		D13199AD2DE0D3130083B629 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		D13199AE2DE0D3130083B629 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -68,14 +77,9 @@
 		D1102C4E2DE2F852000AB7B1 /* AI */ = {
 			isa = PBXGroup;
 			children = (
+				D1102C622DE8AB4D000AB7B1 /* ViewControllers */,
 				D1102C582DE320C9000AB7B1 /* View */,
 				D1102C542DE31854000AB7B1 /* Model */,
-				D1102C4B2DE2F84C000AB7B1 /* HomeViewController.h */,
-				D1102C4C2DE2F84C000AB7B1 /* HomeViewController.m */,
-				D1102C5C2DE32169000AB7B1 /* HomeViewController+Action.h */,
-				D1102C5D2DE32169000AB7B1 /* HomeViewController+Action.m */,
-				D1102C502DE2F873000AB7B1 /* SettingViewController.h */,
-				D1102C512DE2F873000AB7B1 /* SettingViewController.m */,
 			);
 			path = AI;
 			sourceTree = "<group>";
@@ -108,8 +112,27 @@
 			children = (
 				D1102C592DE320D7000AB7B1 /* SettingPopupView.h */,
 				D1102C5A2DE320D7000AB7B1 /* SettingPopupView.m */,
+				D1102C5F2DE8AB38000AB7B1 /* InfoPanelView.h */,
+				D1102C602DE8AB38000AB7B1 /* InfoPanelView.m */,
 			);
 			path = View;
+			sourceTree = "<group>";
+		};
+		D1102C622DE8AB4D000AB7B1 /* ViewControllers */ = {
+			isa = PBXGroup;
+			children = (
+				D1102C502DE2F873000AB7B1 /* SettingViewController.h */,
+				D1102C512DE2F873000AB7B1 /* SettingViewController.m */,
+				D1102C4B2DE2F84C000AB7B1 /* HomeViewController.h */,
+				D1102C4C2DE2F84C000AB7B1 /* HomeViewController.m */,
+				D1102C5C2DE32169000AB7B1 /* HomeViewController+Action.h */,
+				D1102C5D2DE32169000AB7B1 /* HomeViewController+Action.m */,
+				D1102C632DE8AB6D000AB7B1 /* ScanViewController.h */,
+				D1102C642DE8AB6D000AB7B1 /* ScanViewController.m */,
+				D1102C662DE8AC30000AB7B1 /* ScanViewController+deepseek.h */,
+				D1102C672DE8AC30000AB7B1 /* ScanViewController+deepseek.m */,
+			);
+			path = ViewControllers;
 			sourceTree = "<group>";
 		};
 		D13199B92DE0D3130083B629 /* iOS-Demos */ = {
@@ -261,7 +284,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				D13199BA2DE0D3130083B629 /* AppDelegate.m in Sources */,
+				D1102C682DE8AC30000AB7B1 /* ScanViewController+deepseek.m in Sources */,
+				D1102C652DE8AB6D000AB7B1 /* ScanViewController.m in Sources */,
 				D1102C572DE31875000AB7B1 /* SettingItemModel.m in Sources */,
+				D1102C612DE8AB38000AB7B1 /* InfoPanelView.m in Sources */,
 				D13199BB2DE0D3130083B629 /* main.m in Sources */,
 				D1102C5B2DE320D7000AB7B1 /* SettingPopupView.m in Sources */,
 				D13199BD2DE0D3130083B629 /* ViewController.m in Sources */,
