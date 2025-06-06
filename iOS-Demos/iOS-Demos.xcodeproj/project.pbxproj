@@ -16,6 +16,9 @@
 		D1102C612DE8AB38000AB7B1 /* InfoPanelView.m in Sources */ = {isa = PBXBuildFile; fileRef = D1102C602DE8AB38000AB7B1 /* InfoPanelView.m */; };
 		D1102C652DE8AB6D000AB7B1 /* ScanViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D1102C642DE8AB6D000AB7B1 /* ScanViewController.m */; };
 		D1102C682DE8AC30000AB7B1 /* ScanViewController+deepseek.m in Sources */ = {isa = PBXBuildFile; fileRef = D1102C672DE8AC30000AB7B1 /* ScanViewController+deepseek.m */; };
+		D1102C6A2DF30AEA000AB7B1 /* testmodel.json in Resources */ = {isa = PBXBuildFile; fileRef = D1102C692DF30AEA000AB7B1 /* testmodel.json */; };
+		D1102C6D2DF30B34000AB7B1 /* PanelModel.m in Sources */ = {isa = PBXBuildFile; fileRef = D1102C6C2DF30B34000AB7B1 /* PanelModel.m */; };
+		D1102C712DF30E39000AB7B1 /* TestHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = D1102C702DF30E39000AB7B1 /* TestHelper.m */; };
 		D13199BA2DE0D3130083B629 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = D13199AD2DE0D3130083B629 /* AppDelegate.m */; };
 		D13199BB2DE0D3130083B629 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = D13199B22DE0D3130083B629 /* main.m */; };
 		D13199BD2DE0D3130083B629 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D13199B82DE0D3130083B629 /* ViewController.m */; };
@@ -40,6 +43,11 @@
 		D1102C642DE8AB6D000AB7B1 /* ScanViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ScanViewController.m; sourceTree = "<group>"; };
 		D1102C662DE8AC30000AB7B1 /* ScanViewController+deepseek.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ScanViewController+deepseek.h"; sourceTree = "<group>"; };
 		D1102C672DE8AC30000AB7B1 /* ScanViewController+deepseek.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "ScanViewController+deepseek.m"; sourceTree = "<group>"; };
+		D1102C692DF30AEA000AB7B1 /* testmodel.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = testmodel.json; sourceTree = "<group>"; };
+		D1102C6B2DF30B34000AB7B1 /* PanelModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PanelModel.h; sourceTree = "<group>"; };
+		D1102C6C2DF30B34000AB7B1 /* PanelModel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PanelModel.m; sourceTree = "<group>"; };
+		D1102C6F2DF30E39000AB7B1 /* TestHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TestHelper.h; sourceTree = "<group>"; };
+		D1102C702DF30E39000AB7B1 /* TestHelper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TestHelper.m; sourceTree = "<group>"; };
 		D13199AC2DE0D3130083B629 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		D13199AD2DE0D3130083B629 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		D13199AE2DE0D3130083B629 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -77,6 +85,7 @@
 		D1102C4E2DE2F852000AB7B1 /* AI */ = {
 			isa = PBXGroup;
 			children = (
+				D1102C6E2DF30E28000AB7B1 /* Helper */,
 				D1102C622DE8AB4D000AB7B1 /* ViewControllers */,
 				D1102C582DE320C9000AB7B1 /* View */,
 				D1102C542DE31854000AB7B1 /* Model */,
@@ -87,6 +96,7 @@
 		D1102C4F2DE2F860000AB7B1 /* Base */ = {
 			isa = PBXGroup;
 			children = (
+				D1102C692DF30AEA000AB7B1 /* testmodel.json */,
 				D13199AC2DE0D3130083B629 /* AppDelegate.h */,
 				D13199AD2DE0D3130083B629 /* AppDelegate.m */,
 				D13199AE2DE0D3130083B629 /* Assets.xcassets */,
@@ -103,6 +113,8 @@
 			children = (
 				D1102C552DE31875000AB7B1 /* SettingItemModel.h */,
 				D1102C562DE31875000AB7B1 /* SettingItemModel.m */,
+				D1102C6B2DF30B34000AB7B1 /* PanelModel.h */,
+				D1102C6C2DF30B34000AB7B1 /* PanelModel.m */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -133,6 +145,15 @@
 				D1102C672DE8AC30000AB7B1 /* ScanViewController+deepseek.m */,
 			);
 			path = ViewControllers;
+			sourceTree = "<group>";
+		};
+		D1102C6E2DF30E28000AB7B1 /* Helper */ = {
+			isa = PBXGroup;
+			children = (
+				D1102C6F2DF30E39000AB7B1 /* TestHelper.h */,
+				D1102C702DF30E39000AB7B1 /* TestHelper.m */,
+			);
+			path = Helper;
 			sourceTree = "<group>";
 		};
 		D13199B92DE0D3130083B629 /* iOS-Demos */ = {
@@ -231,6 +252,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D13199BE2DE0D3130083B629 /* Assets.xcassets in Resources */,
+				D1102C6A2DF30AEA000AB7B1 /* testmodel.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -287,6 +309,8 @@
 				D1102C682DE8AC30000AB7B1 /* ScanViewController+deepseek.m in Sources */,
 				D1102C652DE8AB6D000AB7B1 /* ScanViewController.m in Sources */,
 				D1102C572DE31875000AB7B1 /* SettingItemModel.m in Sources */,
+				D1102C6D2DF30B34000AB7B1 /* PanelModel.m in Sources */,
+				D1102C712DF30E39000AB7B1 /* TestHelper.m in Sources */,
 				D1102C612DE8AB38000AB7B1 /* InfoPanelView.m in Sources */,
 				D13199BB2DE0D3130083B629 /* main.m in Sources */,
 				D1102C5B2DE320D7000AB7B1 /* SettingPopupView.m in Sources */,

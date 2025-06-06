@@ -8,6 +8,7 @@
 #import "HomeViewController.h"
 #import "BaseFoundation.h"
 #import "HomeViewController+Action.h"
+#import "ScanViewController.h"
 
 @interface HomeViewController ()
 @property (nonatomic, strong) UIImageView *logoView;
@@ -86,6 +87,8 @@
 }
 
 - (void)testButtonClicked {
-    NSLog(@"跳转测一测页");
+    ScanViewController *vc = [[ScanViewController alloc] init];
+    vc.model = [TestHelper showResultPanel];
+    [self.navigationController pushViewController:vc animated:YES];
 }
 @end

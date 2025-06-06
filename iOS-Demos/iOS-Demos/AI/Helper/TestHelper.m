@@ -1,17 +1,17 @@
 //
-//  ScanViewController+deepseek.m
+//  TestHelper.m
 //  iOS-Demos
 //
-//  Created by Chieh on 2025/5/29.
+//  Created by Chieh on 2025/6/6.
 //
 
-#import "ScanViewController+deepseek.h"
+#import "TestHelper.h"
 #import "BaseFoundation.h"
 #import "PanelModel.h"
 
-@implementation ScanViewController (deepseek)
+@implementation TestHelper
 
-- (void)requestDeepseek {
++ (void)requestDeepseek {
     NSString *baseURLString = @"https://api.deepseek.com";
     NSURL *baseURL = [NSURL URLWithString:baseURLString];
     NSString *apiPath = @"/chat/completions";
@@ -45,16 +45,15 @@
     }];
 }
 
-- (void)showResultPanel {
++ (AIResult *)showResultPanel {
     // 获取本地JSON文件路径
     NSString *filePath = [[NSBundle mainBundle] pathForResource:@"testmodel" ofType:@"json"];
     NSError *error = nil;
-    
     // 读取JSON文件内容
     NSData *jsonData = [NSData dataWithContentsOfFile:filePath];
     if (!jsonData) {
         NSLog(@"无法读取JSON文件");
-        return;
+        return nil;
     }
     
     // 将JSON数据转换为字典
@@ -63,14 +62,14 @@
                                                              error:&error];
     if (error) {
         NSLog(@"JSON解析错误: %@", error.localizedDescription);
-        return;
+        return nil;
     }
     
     // 使用JSONModel解析为PanelModel对象
     PanelModel *panelModel = [[PanelModel alloc] initWithDictionary:jsonDict error:&error];
     if (error) {
         NSLog(@"模型解析错误: %@", error.localizedDescription);
-        return;
+        return nil;
     }
     
     // 获取AIResult对象
@@ -82,6 +81,7 @@
     NSLog(@"风格定位 - 结论: %@", aiResult.style_positioning.conclusion);
     NSLog(@"推荐妆容 - 动物系长相: %@", aiResult.summary.animal_type_look);
     
+    return aiResult;
 }
 
 @end

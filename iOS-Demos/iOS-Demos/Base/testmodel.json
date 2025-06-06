@@ -1,0 +1,87 @@
+{
+    "ai_result": {
+        "face_analysis": {
+            "face_shape_and_contour": "瓜子脸，五眼比例接近标准",
+            "facial_features": {
+                "eyes": "眼睛宽度适中，高度略低",
+                "nose": "鼻翼宽度适中",
+                "lips": "嘴唇饱满，下唇略厚",
+                "eyebrows": "眉毛挑度适中，眉尾角度自然"
+            },
+            "keywords_summary": "脸型偏瓜子脸+五官精致，有幼态感"
+        },
+        "style_positioning": {
+            "conclusion": "甜美型",
+            "reference_celebrities": [
+                "赵丽颖",
+                "杨幂",
+                "刘亦菲"
+            ],
+            "recommended_makeup_styles": [
+                "甜美少女妆",
+                "清新自然妆"
+            ],
+            "key_corrections": {
+                "long_mid_face": "",
+                "narrow_chin": "下巴偏窄-用修容稍微拉宽，高光提亮下巴两侧",
+                "wide_cheekbones": ""
+            },
+            "makeup_strategy": "眼妆（纵向放大）+唇妆（饱满色块）",
+            "makeup_focus_points": [
+                "强调眼睛的纵向放大",
+                "使用饱满色块的唇妆",
+                "修容以拉宽下巴",
+                "自然眉型以保持幼态感"
+            ]
+        },
+        "makeup_recommendation": {
+            "daily_date_makeup": {
+                "contour": {
+                    "contour_type": "自然修容",
+                    "techniques": {
+                        "cheekbones": "轻微修饰颧弓",
+                        "chin": "修容拉宽下巴",
+                        "nose_contour": "自然鼻影"
+                    }
+                },
+                "eye_makeup": {
+                    "eyeshadow_color": "粉色系",
+                    "eye_shape": "圆眼",
+                    "techniques": {
+                        "eyeshadow": "纵向晕染",
+                        "eyeliner": "自然内眼线",
+                        "eyelashes": "卷翘睫毛"
+                    }
+                },
+                "eyebrow_makeup": {
+                    "eyebrow_shape": "自然眉",
+                    "techniques": {
+                        "shape": "轻微上扬",
+                        "drawing_method": "填补空隙"
+                    }
+                },
+                "lip_makeup": {
+                    "lip_shape": "饱满唇",
+                    "techniques": "全唇涂抹"
+                },
+                "blush": {
+                    "blush_type": "圆形腮红",
+                    "techniques": {
+                        "placement": "苹果肌",
+                        "color": {
+                            "cool_skin": "粉色",
+                            "warm_skin": "珊瑚色"
+                        }
+                    }
+                }
+            }
+        },
+        "summary": {
+            "recommended_style": "甜美感，适合甜美型风格的妆容",
+            "facial_feature_summary": "你的脸型是瓜子脸，三庭比例适中，五官量感适中",
+            "makeup_age": "24",
+            "facial_polishing": "通过修容和腮红增强面部立体感，眼妆和唇妆突出甜美气质",
+            "animal_type_look": "兔系，圆润的眼睛和饱满的嘴唇显得可爱"
+        }
+    }
+}

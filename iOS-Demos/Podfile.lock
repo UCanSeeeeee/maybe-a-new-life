@@ -14,6 +14,7 @@ PODS:
   - AFNetworking/Serialization (4.0.1)
   - AFNetworking/UIKit (4.0.1):
     - AFNetworking/NSURLSession
+  - JSONModel (1.8.0)
   - libextobjc (0.6):
     - libextobjc/EXTADT (= 0.6)
     - libextobjc/EXTConcreteProtocol (= 0.6)
@@ -77,6 +78,7 @@ PODS:
 
 DEPENDENCIES:
   - AFNetworking (~> 4.0)
+  - JSONModel
   - libextobjc
   - LookinServer
   - SDWebImage
@@ -87,6 +89,7 @@ DEPENDENCIES:
 SPEC REPOS:
   trunk:
     - AFNetworking
+    - JSONModel
     - libextobjc
     - libwebp
     - LookinServer
@@ -96,6 +99,7 @@ SPEC REPOS:
 
 SPEC CHECKSUMS:
   AFNetworking: 3bd23d814e976cd148d7d44c3ab78017b744cd58
+  JSONModel: 02ab723958366a3fd27da57ea2af2113658762e9
   libextobjc: aed8b7d2b07f511c1a7ecaacb33ea03e327c69b7
   libwebp: 1786c9f4ff8a279e4dac1e8f385004d5fc253009
   LookinServer: 4ce0469b066871525611d009d8d16a7a50c23491
@@ -103,6 +107,6 @@ SPEC CHECKSUMS:
   WechatOpenSDK-XCFramework: 36fb2bea0754266c17184adf4963d7e6ff98b69f
   YYCategories: 6bcd4314c6661a561410dce4a793379ebd306abd
 
-PODFILE CHECKSUM: 88cf4a3f4d3b8e2691b940546372b905beb1bec7
+PODFILE CHECKSUM: ba3575cc4d54d4bd5768e8587deae2c5c41c4145
 
 COCOAPODS: 1.15.2

@@ -14,6 +14,7 @@ target 'iOS-Demos' do
   pod 'AFNetworking', '~> 4.0'
   pod 'WechatOpenSDK-XCFramework'
   pod 'libextobjc'
+  pod 'JSONModel'
 
 end
 

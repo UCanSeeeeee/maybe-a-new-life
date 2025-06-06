@@ -11,6 +11,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface ScanViewController (deepseek)
 
+- (void)requestDeepseek;
+
 @end
 
 NS_ASSUME_NONNULL_END
