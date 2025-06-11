@@ -15,7 +15,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.view.backgroundColor = UIColor.systemPinkColor;
+    self.view.backgroundColor = UIColor.systemBlueColor;
 }
 
 

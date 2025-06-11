@@ -7,10 +7,11 @@
 
 #import "ScanViewController.h"
 #import "BaseFoundation.h"
+
 @interface ScanViewController () <UIGestureRecognizerDelegate>
 
-@property (nonatomic, strong) UIView *panelView;        // 外部容器
-@property (nonatomic, strong) UIView *contentView;      // 内容视图
+@property (nonatomic, strong) InfoPanelView *panelContentView;
+@property (nonatomic, strong) UIView *panelContainer;        // 外部容器
 @property (nonatomic, strong) UIPanGestureRecognizer *panGesture; // 滑动手势
 @property (nonatomic, assign) CGFloat panelTopLimit;    // 顶部限制
 @property (nonatomic, assign) CGFloat contentScrollY;   // 内容滚动位置
@@ -40,47 +41,30 @@
 
 - (void)setupPanelView {
     // 创建面板视图
-    CGFloat panelHeight = self.view.height * 1.3;
-    self.panelView = [[UIView alloc] initWithFrame:CGRectMake(0, self.view.height * 0.9, self.view.bounds.size.width, panelHeight)];
-    self.panelView.backgroundColor = [UIColor whiteColor];
-    self.panelView.layer.cornerRadius = 16;
-    self.panelView.clipsToBounds = YES;
+    
+    self.panelContainer = [[UIView alloc] initWithFrame:CGRectMake(0, self.view.height * 0.9, self.view.bounds.size.width, self.view.height - self.panelTopLimit)];
+    self.panelContainer.backgroundColor = [UIColor whiteColor];
+    self.panelContainer.layer.cornerRadius = 16;
+    self.panelContainer.clipsToBounds = YES;
     
     // 添加三色渐变背景
     CAGradientLayer *gradient = [CAGradientLayer layer];
-    gradient.frame = self.panelView.bounds;
-    gradient.colors = @[(__bridge id)[UIColor colorWithRed:0.9 green:0.4 blue:0.4 alpha:1.0].CGColor,
-                        (__bridge id)[UIColor colorWithRed:0.4 green:0.9 blue:0.4 alpha:1.0].CGColor,
-                        (__bridge id)[UIColor colorWithRed:0.4 green:0.4 blue:0.9 alpha:1.0].CGColor];
+    gradient.frame = self.panelContainer.bounds;
+    gradient.colors = @[(__bridge id)[UIColor colorWithRed:0.9 green:0.4 blue:0.4 alpha:0.2].CGColor,
+                        (__bridge id)[UIColor colorWithRed:0.4 green:0.9 blue:0.4 alpha:0.2].CGColor,
+                        (__bridge id)[UIColor colorWithRed:0.4 green:0.4 blue:0.9 alpha:0.2].CGColor];
     gradient.startPoint = CGPointMake(0.0, 0.0);
     gradient.endPoint = CGPointMake(1.0, 1.0);
-    [self.panelView.layer insertSublayer:gradient atIndex:0];
+    [self.panelContainer.layer insertSublayer:gradient atIndex:0];
     
-    [self.view addSubview:self.panelView];
+    [self.view addSubview:self.panelContainer];
 }
 
 - (void)setupContentView {
-    // 创建内容视图容器
-    self.contentView = [[UIView alloc] initWithFrame:self.panelView.bounds];
-    self.contentView.height = self.view.height - 100;
-    self.contentView.backgroundColor = [UIColor clearColor];
-    [self.panelView addSubview:self.contentView];
-    
-    // 添加测试内容
-    CGFloat labelHeight = 40;
-    UIView *contentContainer = [[UIView alloc] initWithFrame:self.contentView.bounds];
-    
-    for (int i = 0; i < 30; i++) {
-        UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(20, i * labelHeight, self.contentView.bounds.size.width - 40, labelHeight)];
-        label.text = [NSString stringWithFormat:@"第 %d 行内容", i + 1];
-        label.textColor = [UIColor blackColor];
-        [contentContainer addSubview:label];
-    }
-    
-    [self.contentView addSubview:contentContainer];
-    
-    // 计算内容最大滚动距离
-    self.maxContentScroll = 30 * labelHeight - self.contentView.bounds.size.height;
+    self.panelContentView = [InfoPanelView new];
+    [self.panelContainer addSubview:self.panelContentView];
+    [self.panelContentView loadViewWithModel:self.model];
+    self.maxContentScroll = self.panelContentView.bottom - self.panelContainer.bounds.size.height;
     if (self.maxContentScroll < 0) {
         self.maxContentScroll = 0;
     }
@@ -90,7 +74,7 @@
     // 添加滑动手势到内容视图
     self.panGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePan:)];
     self.panGesture.delegate = self;
-    [self.contentView addGestureRecognizer:self.panGesture];
+    [self.panelContentView addGestureRecognizer:self.panGesture];
 }
 
 #pragma mark - 手势处理
@@ -106,7 +90,7 @@
     
     // 手势开始时记录初始位置
     if (gesture.state == UIGestureRecognizerStateBegan) {
-        initialPanelY = self.panelView.frame.origin.y;
+        initialPanelY = self.panelContainer.frame.origin.y;
         initialContentY = self.contentScrollY;
         [gesture setTranslation:CGPointZero inView:self.view];
         return;
@@ -143,7 +127,7 @@
         gesture.state == UIGestureRecognizerStateCancelled) {
         
         // 计算面板最终位置
-        if (self.panelView.frame.origin.y > positionTop) {
+        if (self.panelContainer.frame.origin.y > positionTop) {
             CGFloat finalY;
             
             // 根据速度和位置决定最终位置
@@ -151,7 +135,7 @@
                 finalY = velocity.y > 0 ? positionBottom : positionTop;
             } else {
                 CGFloat midPoint = (positionTop + positionBottom) / 2;
-                finalY = self.panelView.frame.origin.y < midPoint ? positionTop : positionBottom;
+                finalY = self.panelContainer.frame.origin.y < midPoint ? positionTop : positionBottom;
             }
             
             // 更新面板状态
@@ -188,9 +172,9 @@
 
 #pragma mark - 位置更新
 - (void)updatePanelPosition:(CGFloat)yPosition {
-    CGRect frame = self.panelView.frame;
+    CGRect frame = self.panelContainer.frame;
     frame.origin.y = yPosition;
-    self.panelView.frame = frame;
+    self.panelContainer.frame = frame;
     
     // 更新面板位置状态
     self.isPanelAtTop = (yPosition == self.panelTopLimit);
@@ -198,8 +182,8 @@
 
 - (void)updateContentPosition {
     // 更新内容子视图的位置
-    if (self.contentView.subviews.count > 0) {
-        UIView *contentContainer = self.contentView.subviews[0];
+    if (self.panelContainer.subviews.count > 0) {
+        UIView *contentContainer = self.panelContainer.subviews[0];
         CGRect frame = contentContainer.frame;
         frame.origin.y = -self.contentScrollY;
         contentContainer.frame = frame;

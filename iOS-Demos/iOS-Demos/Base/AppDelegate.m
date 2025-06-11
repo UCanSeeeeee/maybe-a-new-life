@@ -20,6 +20,7 @@
     self.window = [UIWindow new];
     HomeViewController *rootVC = [HomeViewController new];
     UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:rootVC];
+    nav.navigationBar.hidden = YES;
     self.window.rootViewController = nav;
     [self.window makeKeyAndVisible];
     return YES;

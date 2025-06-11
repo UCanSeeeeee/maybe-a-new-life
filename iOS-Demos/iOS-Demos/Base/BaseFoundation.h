@@ -12,7 +12,12 @@
 #import <libextobjc/extobjc.h>
 #import <AFNetworking/AFNetworking.h>
 #import "TestHelper.h"
+#import "PanelModel.h"
+#import "InfoPanelView.h"
 
+#ifndef kScreenRatio
+#define kScreenRatio kScreenWidth / 375.0
+#endif
 // 顶部安全区域高度（包含刘海或灵动岛）
 #define SafeAreaTopHeight ({\
     CGFloat topInset = 0;\

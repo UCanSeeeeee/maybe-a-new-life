@@ -29,6 +29,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) NSString *face_shape_and_contour;    // 脸型与轮廓描述
 @property (nonatomic, strong) FacialFeatures *facial_features;     // 五官特征详情
 @property (nonatomic, strong) NSString *keywords_summary;          // 关键词总结
+@property (nonatomic, strong) NSString *keywords_summary_2;          // 关键词总结
 @end
 
 /**
@@ -36,7 +37,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface StylePositioning : JSONModel
 @property (nonatomic, strong) NSString *conclusion;                                    // 分析结论
-@property (nonatomic, strong) NSArray<NSString*> *reference_celebrities;              // 参考明星列表
+@property (nonatomic, strong) NSArray<NSString*> *reference_celebrities;              // 参考明星列表 b2
 @property (nonatomic, strong) NSArray<NSString*> *recommended_makeup_styles;          // 推荐妆容风格列表
 @property (nonatomic, strong) NSDictionary<NSString*, NSString*> *key_corrections;    // 重点修饰建议
 @property (nonatomic, strong) NSString *makeup_strategy;                              // 妆容思路
@@ -56,8 +57,9 @@ NS_ASSUME_NONNULL_BEGIN
  * 修容模型
  */
 @interface Contour : JSONModel
-@property (nonatomic, strong) NSString *contour_type;    // 修容类型
-@property (nonatomic, strong) Techniques *techniques;     // 修容技巧
+@property (nonatomic, strong) NSString *shape;
+@property (nonatomic, strong) NSNumber<Optional> *eyeshadow_color;
+@property (nonatomic, strong) NSArray<NSString *> *techniques;
 @end
 
 /**
@@ -74,7 +76,10 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface DailyDateMakeup : JSONModel
 @property (nonatomic, strong) Contour *contour;         // 修容方案
-@property (nonatomic, strong) EyeMakeup *eye_makeup;    // 眼妆方案
+@property (nonatomic, strong) Contour *eye_makeup;    // 眼妆方案
+@property (nonatomic, strong) Contour *eyebrow_makeup;    // 眉毛方案
+@property (nonatomic, strong) Contour *lip_makeup;    // 唇部方案
+@property (nonatomic, strong) Contour *blush;    // 腮红方案
 // ... 其他makeup相关属性
 @end
 
@@ -86,24 +91,24 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 /**
- * 总结模型
+ * 总结模型 d
  */
 @interface Summary : JSONModel
-@property (nonatomic, strong) NSString *recommended_style;        // 推荐风格
-@property (nonatomic, strong) NSString *facial_feature_summary;   // 面部特点总结
-@property (nonatomic, strong) NSString *makeup_age;              // 肌龄妆感
-@property (nonatomic, strong) NSString *facial_polishing;        // 面部润色建议
-@property (nonatomic, strong) NSString *animal_type_look;        // 动物系长相
+@property (nonatomic, strong) NSString *recommended_style;        // 推荐风格 d-1
+@property (nonatomic, strong) NSString *facial_feature_summary;   // 面部特点总结 d-2
+@property (nonatomic, strong) NSString *makeup_age;              // 肌龄妆感 24 d-3
+@property (nonatomic, strong) NSString *facial_polishing;        // 面部润色建议 d-4
+@property (nonatomic, strong) NSString *animal_type_look;        // 动物系长相 d-5
 @end
 
 /**
  * AI分析结果模型
  */
 @interface AIResult : JSONModel
-@property (nonatomic, strong) FaceAnalysis *face_analysis;                // 面部分析
-@property (nonatomic, strong) StylePositioning *style_positioning;        // 风格定位
-@property (nonatomic, strong) MakeupRecommendation *makeup_recommendation;// 妆容推荐
-@property (nonatomic, strong) Summary *summary;                           // 总结
+@property (nonatomic, strong) FaceAnalysis *face_analysis;                // 面部分析a
+@property (nonatomic, strong) StylePositioning *style_positioning;        // 风格定位b
+@property (nonatomic, strong) MakeupRecommendation *makeup_recommendation;// 妆容推荐c
+@property (nonatomic, strong) Summary *summary;                           // 总结d
 @end
 
 /**
