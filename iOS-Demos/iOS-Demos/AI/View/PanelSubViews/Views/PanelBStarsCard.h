@@ -12,7 +12,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface PanelBStarsCard : UIView
 
-- (void)loadViewWithModel:(StylePositioning *)model;
+- (void)loadView;
 
 @end
 

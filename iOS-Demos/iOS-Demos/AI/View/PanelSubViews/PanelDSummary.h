@@ -7,12 +7,15 @@
 
 #import <UIKit/UIKit.h>
 #import "BaseFoundation.h"
+#import "ConclusionModel.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface PanelDSummary : UIView
 
-- (void)loadViewWithModel:(Summary *)model;
+@property (nonatomic, strong) ConclusionModel *dataModel;
+
+- (void)loadView;
 
 @end
 

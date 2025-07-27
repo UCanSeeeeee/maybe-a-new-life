@@ -7,16 +7,21 @@
 
 #import "ScanViewController.h"
 #import "BaseFoundation.h"
+#import "PanelDSummary.h"
 
 @interface ScanViewController () <UIGestureRecognizerDelegate>
 
-@property (nonatomic, strong) InfoPanelView *panelContentView;
 @property (nonatomic, strong) UIView *panelContainer;        // 外部容器
+@property (nonatomic, strong) PanelDSummary *topView;
+@property (nonatomic, strong) InfoPanelView *panelContentView;
 @property (nonatomic, strong) UIPanGestureRecognizer *panGesture; // 滑动手势
 @property (nonatomic, assign) CGFloat panelTopLimit;    // 顶部限制
 @property (nonatomic, assign) CGFloat contentScrollY;   // 内容滚动位置
 @property (nonatomic, assign) CGFloat maxContentScroll; // 内容最大滚动距离
 @property (nonatomic, assign) BOOL isPanelAtTop;        // 面板是否在顶部
+@property (nonatomic, strong) UIView *buttonContainer;        // 按钮容器
+@property (nonatomic, strong) NSArray<UIButton *> *sectionButtons;  // 分段按钮数组
+@property (nonatomic, assign) NSInteger currentSectionIndex;  // 当前选中的段落索引
 
 @end
 
@@ -61,10 +66,24 @@
 }
 
 - (void)setupContentView {
+    self.topView = [PanelDSummary new];
+    [self.panelContainer addSubview:self.topView];
+    [self.topView loadView];
+    self.topView.top = 20;
+    
+    // 设置按钮组
+    [self setupSectionButtons];
+    
+    UIView *clipContainer = [[UIView alloc] init];
+    [self.panelContainer addSubview:clipContainer];
     self.panelContentView = [InfoPanelView new];
-    [self.panelContainer addSubview:self.panelContentView];
-    [self.panelContentView loadViewWithModel:self.model];
-    self.maxContentScroll = self.panelContentView.bottom - self.panelContainer.bounds.size.height;
+    [clipContainer addSubview:self.panelContentView];
+    [self.panelContentView loadView];
+    clipContainer.size = self.panelContentView.size;
+    clipContainer.top = self.buttonContainer.bottom + 10;
+    clipContainer.clipsToBounds = YES;
+    
+    self.maxContentScroll = self.panelContentView.bottom - self.panelContainer.bounds.size.height + clipContainer.top;
     if (self.maxContentScroll < 0) {
         self.maxContentScroll = 0;
     }
@@ -74,7 +93,8 @@
     // 添加滑动手势到内容视图
     self.panGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePan:)];
     self.panGesture.delegate = self;
-    [self.panelContentView addGestureRecognizer:self.panGesture];
+//    UIView *tempGes = [UIView new];
+    [self.panelContainer addGestureRecognizer:self.panGesture];
 }
 
 #pragma mark - 手势处理
@@ -183,10 +203,12 @@
 - (void)updateContentPosition {
     // 更新内容子视图的位置
     if (self.panelContainer.subviews.count > 0) {
-        UIView *contentContainer = self.panelContainer.subviews[0];
+        UIView *contentContainer = self.panelContentView;
         CGRect frame = contentContainer.frame;
         frame.origin.y = -self.contentScrollY;
         contentContainer.frame = frame;
+        // 更新按钮状态
+       [self updateSectionButtonsForOffset:self.contentScrollY];
     }
 }
 
@@ -195,6 +217,98 @@
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
     // 允许同时识别
     return YES;
+}
+
+#pragma mark - 控制板块
+- (void)updateSectionButtonsForOffset:(CGFloat)offset {
+    // 根据偏移量判断当前显示的是哪个部分
+    NSInteger targetSection = 0;
+    
+    if (offset >= self.panelContentView.makeupView.top) {
+        targetSection = 2;
+    } else if (offset >= self.panelContentView.styleView.top) {
+        targetSection = 1;
+    }
+    
+    if (targetSection != self.currentSectionIndex) {
+        [self updateSelectedButton:targetSection];
+    }
+}
+
+- (void)setupSectionButtons {
+    // 创建按钮容器
+    self.buttonContainer = [[UIView alloc] init];
+    [self.panelContainer addSubview:self.buttonContainer];
+    self.buttonContainer.frame = CGRectMake(0, self.topView.bottom + 10, self.view.width, 40);
+    
+    // 创建三个按钮
+    NSArray *titles = @[@"面部分析", @"风格定位", @"妆容推荐"];
+    NSMutableArray *buttons = [NSMutableArray array];
+    CGFloat buttonWidth = self.view.width / 3;
+    
+    for (NSInteger i = 0; i < titles.count; i++) {
+        UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+        button.frame = CGRectMake(buttonWidth * i, 0, buttonWidth, 40);
+        [button setTitle:titles[i] forState:UIControlStateNormal];
+        button.titleLabel.font = [UIFont systemFontOfSize:14 weight:UIFontWeightMedium];
+        [button setTitleColor:[UIColor colorWithHexString:@"#777777"] forState:UIControlStateNormal];
+        [button setTitleColor:[UIColor colorWithHexString:@"#262626"] forState:UIControlStateSelected];
+        button.tag = i;
+        [button addTarget:self action:@selector(sectionButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
+        [self.buttonContainer addSubview:button];
+        [buttons addObject:button];
+    }
+    
+    self.sectionButtons = buttons;
+    // 默认选中第一个按钮
+    [self updateSelectedButton:0];
+}
+
+- (void)sectionButtonTapped:(UIButton *)sender {
+    [self scrollToSection:sender.tag animated:YES];
+}
+
+- (void)scrollToSection:(NSInteger)sectionIndex animated:(BOOL)animated {
+    // 更新按钮状态
+    [self updateSelectedButton:sectionIndex];
+    
+    // 计算目标偏移量
+    CGFloat targetOffset = 0;
+    switch (sectionIndex) {
+        case 0: // 面部分析
+            targetOffset = 0;
+            break;
+        case 1: // 风格定位
+            targetOffset = self.panelContentView.styleView.top;
+            break;
+        case 2: // 妆容推荐
+            targetOffset = self.panelContentView.makeupView.top;
+            break;
+    }
+    
+    // 确保不超过最大滚动距离
+    targetOffset = MIN(targetOffset, self.maxContentScroll);
+    targetOffset = MAX(0, targetOffset);
+    
+    // 执行滚动动画
+    if (animated) {
+        [UIView animateWithDuration:0.3 animations:^{
+            self.contentScrollY = targetOffset;
+            [self updateContentPosition];
+        }];
+    } else {
+        self.contentScrollY = targetOffset;
+        [self updateContentPosition];
+    }
+}
+
+- (void)updateSelectedButton:(NSInteger)selectedIndex {
+    self.currentSectionIndex = selectedIndex;
+    [self.sectionButtons enumerateObjectsUsingBlock:^(UIButton *button, NSUInteger idx, BOOL *stop) {
+        button.selected = (idx == selectedIndex);
+        // 可以添加更多选中状态的样式
+        button.backgroundColor = (idx == selectedIndex) ? [UIColor colorWithWhite:0.9 alpha:1.0] : [UIColor clearColor];
+    }];
 }
 
 #pragma mark - 外部接口

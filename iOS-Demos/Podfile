@@ -7,14 +7,16 @@ target 'iOS-Demos' do
 
   # Pods for iOS-Demos
 
-  pod 'SDWebImage'
-  pod 'SDWebImage/WebP'
+  pod 'SDWebImage', '~> 5.0'
+  # pod 'SDWebImage/WebP'
+  pod 'SDWebImageWebPCoder'
   pod 'YYCategories'
   pod 'LookinServer'
   pod 'AFNetworking', '~> 4.0'
   pod 'WechatOpenSDK-XCFramework'
   pod 'libextobjc'
   pod 'JSONModel'
+  pod 'PromiseKit'
 
 end
 

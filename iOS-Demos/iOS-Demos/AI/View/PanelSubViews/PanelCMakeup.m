@@ -7,8 +7,12 @@
 
 #import "PanelCMakeup.h"
 #import "PanelCItems.h"
+#import "BaseFoundation.h"
+#import "GlobalModel.h"
+#import "PanelCRecommandModel.h"
 
 @interface PanelCMakeup ()
+@property (nonatomic, strong) PanelCRecommandModel *dataModel;
 @property (nonatomic, strong) UIView *viewsContainer;
 @property (nonatomic, strong) UIView *titleImageView;
 @property (nonatomic, strong) UILabel *titleLabel;
@@ -28,7 +32,7 @@
 - (void)setupSubviews {
     self.viewsContainer = [UIView new];
     self.viewsContainer.size = CGSizeMake(kScreenWidth - 32, 1000);
-    self.viewsContainer.left = 16;
+    self.viewsContainer.left = 0;
     self.viewsContainer.backgroundColor = [UIColor colorWithHexString:@"#FFF6EB"];
     self.viewsContainer.layer.cornerRadius = 20;
     [self addSubview:self.viewsContainer];
@@ -51,10 +55,14 @@
     self.titleLabel.left = self.titleImageView.right + 3;
 }
 
-- (void)loadViewWithModel:(MakeupRecommendation *)model {
+- (void)loadView {
+    GlobalModel *tempModel = GlobalToolHandler.fetchGlobalModel;
+    self.dataModel = tempModel.panelCRecommandModel;
+    NSLog(@"chieh C %@", self.dataModel);
+    
     UILabel *summaryLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, self.viewsContainer.width - 32, 24)];
     [self.viewsContainer addSubview:summaryLabel];
-    summaryLabel.text = @"通勤约会「清冷白开水妆」";
+    summaryLabel.text = self.dataModel.recommandStyle;
     summaryLabel.font = [UIFont boldSystemFontOfSize:14];
     summaryLabel.textColor = [UIColor blackColor];
     [summaryLabel sizeToFit];
@@ -73,27 +81,35 @@
     PanelCItems *itemA = [PanelCItems new];
     itemA.width = bgContainer.width;
     [bgContainer addSubview:itemA];
-    [itemA loadViewWithModel:model.daily_date_makeup.contour andImagePrefix:@"contour_" andTitle:@"1. 修容"];
+    [itemA loadViewWithTitle:@"1. 修容" imageStr:[NSString stringWithFormat:@"contour_%ld", self.dataModel.contourType.integerValue] values:self.dataModel.contourValues];
     itemA.top = 16;
+    
+    PanelCItems *itemBA = [PanelCItems new];
+    itemBA.width = bgContainer.width;
+    [bgContainer addSubview:itemBA];
+    [itemBA loadViewWithTitle:@"2. 眼影" imageStr:[NSString stringWithFormat:@"shadowcolor_%ld", self.dataModel.eyeshadowColorType.integerValue] values:self.dataModel.eyeshadowValues];
+    itemBA.top = itemA.bottom;
+    
     PanelCItems *itemB = [PanelCItems new];
     itemB.width = bgContainer.width;
     [bgContainer addSubview:itemB];
-    [itemB loadViewWithModel:model.daily_date_makeup.eye_makeup andImagePrefix:@"eye_" andTitle:@"2. 眼妆"];
-    itemB.top = itemA.bottom;
+    [itemB loadViewWithTitle:@"3. 眼妆" imageStr:[NSString stringWithFormat:@"eye_%ld", self.dataModel.eyeShapeType.integerValue] values:self.dataModel.eyeshapeValues];
+    itemB.top = itemBA.bottom;
+    
     PanelCItems *itemC = [PanelCItems new];
     itemC.width = bgContainer.width;
     [bgContainer addSubview:itemC];
-    [itemC loadViewWithModel:model.daily_date_makeup.eyebrow_makeup andImagePrefix:@"eyebrow_" andTitle:@"3. 眉妆"];
+    [itemC loadViewWithTitle:@"4. 眉妆" imageStr:[NSString stringWithFormat:@"eyebrow_%ld", self.dataModel.eyebrowStyleType.integerValue] values:self.dataModel.eyebrowValues];
     itemC.top = itemB.bottom;
     PanelCItems *itemD = [PanelCItems new];
     itemD.width = bgContainer.width;
     [bgContainer addSubview:itemD];
-    [itemD loadViewWithModel:model.daily_date_makeup.lip_makeup andImagePrefix:@"lip_" andTitle:@"4. 唇妆"];
+    [itemD loadViewWithTitle:@"5. 唇妆" imageStr:[NSString stringWithFormat:@"lip_%ld", self.dataModel.lipType.integerValue] values:self.dataModel.lipValues];
     itemD.top = itemC.bottom;
     PanelCItems *itemE = [PanelCItems new];
     itemE.width = bgContainer.width;
     [bgContainer addSubview:itemE];
-    [itemE loadViewWithModel:model.daily_date_makeup.blush andImagePrefix:@"blush_" andTitle:@"5. 腮红"];
+    [itemE loadViewWithTitle:@"6. 腮红" imageStr:[NSString stringWithFormat:@"blush_%ld", self.dataModel.blushType.integerValue] values:self.dataModel.blushValues];
     itemE.top = itemD.bottom;
 
     bgContainer.height = itemE.bottom + 12;

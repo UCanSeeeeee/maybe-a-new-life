@@ -11,9 +11,10 @@
 #import "YYCategories.h"
 #import <libextobjc/extobjc.h>
 #import <AFNetworking/AFNetworking.h>
-#import "TestHelper.h"
-#import "PanelModel.h"
 #import "InfoPanelView.h"
+#import "CenterToastView.h"
+#import "GlobalToolHandler.h"
+#import "GlobalToolHandler+Promise.h"
 
 #ifndef kScreenRatio
 #define kScreenRatio kScreenWidth / 375.0

@@ -6,6 +6,8 @@
 //
 
 #import "PanelBStarsCard.h"
+#import "GlobalModel.h"
+#import "PanelBDetailModel.h"
 
 @interface PanelBStarsCard ()
 @property (nonatomic, strong) UILabel *titleLabel;
@@ -56,18 +58,19 @@
     self.celebrityLabel.textAlignment = NSTextAlignmentCenter;
 }
 
-- (void)loadViewWithModel:(StylePositioning *)model {
+- (void)loadView {
+    GlobalModel *tempModel = [GlobalToolHandler fetchGlobalModel];
     self.titleLabel.top = 16;
     self.titleLabel.centerX = self.width / 2.0;
-    self.celebrityLabel.text = [model.reference_celebrities componentsJoinedByString:@"、"];
+    self.celebrityLabel.text = tempModel.conclusionModel.similarStar;
     [self.celebrityLabel sizeToFit];
     self.celebrityLabel.centerX = self.width / 2.0;
     self.celebrityLabel.top = self.titleLabel.bottom + 7;
 
     // 创建底部推荐标签
-    NSInteger maxCount = MIN(model.recommended_makeup_styles.count, 3);
-    NSArray *makeupStyles = [model.recommended_makeup_styles subarrayWithRange:NSMakeRange(0, maxCount)];
-
+    NSArray *rawArr = [tempModel.panelBDetailModel.recommended_makeup_styles componentsSeparatedByString:@"/"];
+    NSInteger maxCount = MIN(rawArr.count, 3);
+    NSArray *makeupStyles = [rawArr subarrayWithRange:NSMakeRange(0, maxCount)];
     if (makeupStyles.count > 0) {
         CGFloat containerWidth = self.width - 18;
         UIView *container = [[UIView alloc] initWithFrame:CGRectMake(0, 0, containerWidth, 0)];

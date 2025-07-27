@@ -7,9 +7,11 @@
 
 #import "PanelAFace.h"
 #import "PanelAItems.h"
+#import "BaseFoundation.h"
+#import "GlobalModel.h"
 
 @interface PanelAFace ()
-
+@property (nonatomic, strong) PanelAFaceModel *dataModel;
 @property (nonatomic, strong) UIView *viewsContainer;
 @property (nonatomic, strong) UIView *titleImageView;
 @property (nonatomic, strong) UILabel *titleLabel;
@@ -30,7 +32,7 @@
 - (void)setupSubviews {
     self.viewsContainer = [UIView new];
     self.viewsContainer.size = CGSizeMake(kScreenWidth - 32, 1000);
-    self.viewsContainer.left = 16;
+    self.viewsContainer.left = 0;
     self.viewsContainer.backgroundColor = [UIColor colorWithHexString:@"#F3F2FF"];
     self.viewsContainer.layer.cornerRadius = 20;
     [self addSubview:self.viewsContainer];
@@ -52,11 +54,13 @@
     self.titleLabel.left = self.titleImageView.right + 3;
 }
 
-- (void)loadViewWithModel:(FaceAnalysis *)model {
-    
+- (void)loadView {
+    GlobalModel *tempModel = GlobalToolHandler.fetchGlobalModel;
+    self.dataModel = tempModel.panelAFaceModel;
+    NSLog(@"chieh A %@", self.dataModel);
     UILabel *summaryLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, self.viewsContainer.width - 32, 24)];
     [self.viewsContainer addSubview:summaryLabel];
-    summaryLabel.text = model.face_shape_and_contour;
+    summaryLabel.text = [NSString stringWithFormat:@"%@+%@", tempModel.conclusionModel.fetchFaceStyleString, self.dataModel.faceFeatures];
     summaryLabel.font = [UIFont boldSystemFontOfSize:14];
     summaryLabel.textColor = [UIColor blackColor];
     [summaryLabel sizeToFit];
@@ -83,18 +87,28 @@
     shapeTitleLabel.left = 12;
 
     NSString *tempString = @"biao";
-    if ([model.keywords_summary containsString:@"菱"]) {
-        tempString = @"ling";
-    } else if ([model.keywords_summary containsString:@"长"]) {
-        tempString = @"chang";
-    } else if ([model.keywords_summary containsString:@"方"]) {
-        tempString = @"fang";
-    } else if ([model.keywords_summary containsString:@"瓜"]) {
-        tempString = @"gua";
-    } else if ([model.keywords_summary containsString:@"圆"]) {
-        tempString = @"yuan";
-    } else if ([model.keywords_summary containsString:@"梨"]) {
-        tempString = @"li";
+    switch (tempModel.conclusionModel.faceStyle.integerValue) {
+        case 1:
+            tempString = @"chang";
+            break;
+        case 2:
+            tempString = @"yuan";
+            break;
+        case 3:
+            tempString = @"chang";
+            break;
+        case 4:
+            tempString = @"li";
+            break;
+        case 5:
+            tempString = @"gua";
+            break;
+        case 6:
+            tempString = @"ling";
+            break;
+        case 0:
+        default:
+            break;
     }
     UIImageView *faceImage = [[UIImageView alloc] initWithImage:[UIImage imageNamed:[NSString stringWithFormat:@"face_%@", tempString]]];
     [bgContainer addSubview:faceImage];
@@ -104,7 +118,7 @@
     
     UILabel *shapeDetailLabel = [[UILabel alloc] init];
     [bgContainer addSubview:shapeDetailLabel];
-    shapeDetailLabel.text = model.keywords_summary;
+    shapeDetailLabel.text = [NSString stringWithFormat:@"偏%@", tempModel.conclusionModel.fetchFaceStyleString];
     shapeDetailLabel.font = [UIFont boldSystemFontOfSize:13];
     shapeDetailLabel.top = faceImage.top + 5;
     shapeDetailLabel.left = faceImage.right + 9;
@@ -113,7 +127,7 @@
     
     UILabel *shapeDetailLabel2 = [[UILabel alloc] init];
     [bgContainer addSubview:shapeDetailLabel2];
-    shapeDetailLabel2.text = model.keywords_summary_2;
+    shapeDetailLabel2.text = tempModel.conclusionModel.fetchFaceStyleConclusionString;
     shapeDetailLabel2.numberOfLines = 4;
     shapeDetailLabel2.font = [UIFont systemFontOfSize:13];
     shapeDetailLabel2.top = shapeDetailLabel.bottom + 8;
@@ -133,24 +147,24 @@
     
     PanelAItems *eyesView = [PanelAItems new];
     [bgContainer addSubview:eyesView];
-    [eyesView loadViewWithTitle:@"眼睛" andContent:model.facial_features.eyes andImage:[UIImage imageNamed:@"senses_eyes"]];
+    [eyesView loadViewWithTitle:@"眼睛" andContent:self.dataModel.eyes andImage:[UIImage imageNamed:@"senses_eyes"]];
     eyesView.top = featuresTitleLabel.bottom + 13;
     eyesView.left = 20;
     PanelAItems *noseView = [PanelAItems new];
     [bgContainer addSubview:noseView];
-    [noseView loadViewWithTitle:@"鼻子" andContent:model.facial_features.nose andImage:[UIImage imageNamed:@"senses_nose"]];
+    [noseView loadViewWithTitle:@"鼻子" andContent:self.dataModel.nose andImage:[UIImage imageNamed:@"senses_nose"]];
     noseView.top = eyesView.top;
     noseView.left = eyesView.right + 11;
 
     PanelAItems *eyebrowsView = [PanelAItems new];
     [bgContainer addSubview:eyebrowsView];
-    [eyebrowsView loadViewWithTitle:@"眼睛" andContent:model.facial_features.eyebrows andImage:[UIImage imageNamed:@"senses_eyebrows"]];
+    [eyebrowsView loadViewWithTitle:@"眼睛" andContent:self.dataModel.eyebrows andImage:[UIImage imageNamed:@"senses_eyebrows"]];
     eyebrowsView.top = eyesView.bottom + 11;
     eyebrowsView.left = 20;
     
     PanelAItems *mouthView = [PanelAItems new];
     [bgContainer addSubview:mouthView];
-    [mouthView loadViewWithTitle:@"嘴唇" andContent:model.facial_features.lips andImage:[UIImage imageNamed:@"senses_mouth"]];
+    [mouthView loadViewWithTitle:@"嘴唇" andContent:self.dataModel.lips andImage:[UIImage imageNamed:@"senses_mouth"]];
     mouthView.top = eyebrowsView.top;
     mouthView.left = eyebrowsView.right + 11;
     

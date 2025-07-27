@@ -65,12 +65,21 @@ PODS:
   - LookinServer (1.1.7):
     - LookinServer/Core (= 1.1.7)
   - LookinServer/Core (1.1.7)
-  - SDWebImage (4.4.8):
-    - SDWebImage/Core (= 4.4.8)
-  - SDWebImage/Core (4.4.8)
-  - SDWebImage/WebP (4.4.8):
-    - libwebp (< 2.0, >= 0.5)
-    - SDWebImage/Core
+  - PromiseKit (8.1.0):
+    - PromiseKit/CorePromise (= 8.1.0)
+    - PromiseKit/Foundation (= 8.1.0)
+    - PromiseKit/UIKit (= 8.1.0)
+  - PromiseKit/CorePromise (8.1.0)
+  - PromiseKit/Foundation (8.1.0):
+    - PromiseKit/CorePromise
+  - PromiseKit/UIKit (8.1.0):
+    - PromiseKit/CorePromise
+  - SDWebImage (5.17.0):
+    - SDWebImage/Core (= 5.17.0)
+  - SDWebImage/Core (5.17.0)
+  - SDWebImageWebPCoder (0.14.6):
+    - libwebp (~> 1.0)
+    - SDWebImage/Core (~> 5.17)
   - WechatOpenSDK-XCFramework (2.0.4)
   - YYCategories (1.0.4):
     - YYCategories/no-arc (= 1.0.4)
@@ -81,8 +90,9 @@ DEPENDENCIES:
   - JSONModel
   - libextobjc
   - LookinServer
-  - SDWebImage
-  - SDWebImage/WebP
+  - PromiseKit
+  - SDWebImage (~> 5.0)
+  - SDWebImageWebPCoder
   - WechatOpenSDK-XCFramework
   - YYCategories
 
@@ -93,7 +103,9 @@ SPEC REPOS:
     - libextobjc
     - libwebp
     - LookinServer
+    - PromiseKit
     - SDWebImage
+    - SDWebImageWebPCoder
     - WechatOpenSDK-XCFramework
     - YYCategories
 
@@ -103,10 +115,12 @@ SPEC CHECKSUMS:
   libextobjc: aed8b7d2b07f511c1a7ecaacb33ea03e327c69b7
   libwebp: 1786c9f4ff8a279e4dac1e8f385004d5fc253009
   LookinServer: 4ce0469b066871525611d009d8d16a7a50c23491
-  SDWebImage: 783af2c3fa36291a250030c4752ee370a9a51d13
+  PromiseKit: b2aa70b27a5592499347efbb4dff1169cd8ce0b2
+  SDWebImage: 750adf017a315a280c60fde706ab1e552a3ae4e9
+  SDWebImageWebPCoder: e38c0a70396191361d60c092933e22c20d5b1380
   WechatOpenSDK-XCFramework: 36fb2bea0754266c17184adf4963d7e6ff98b69f
   YYCategories: 6bcd4314c6661a561410dce4a793379ebd306abd
 
-PODFILE CHECKSUM: ba3575cc4d54d4bd5768e8587deae2c5c41c4145
+PODFILE CHECKSUM: 8c17fed4cf44d4610d2ea43633c44a3b9d891e55
 
 COCOAPODS: 1.15.2

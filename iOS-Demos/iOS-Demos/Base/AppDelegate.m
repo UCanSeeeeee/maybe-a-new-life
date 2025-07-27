@@ -8,6 +8,7 @@
 #import "AppDelegate.h"
 #import "ViewController.h"
 #import "HomeViewController.h"
+#import <SDWebImageWebPCoder/SDImageWebPCoder.h>
 
 @interface AppDelegate ()
 
@@ -15,8 +16,9 @@
 
 @implementation AppDelegate
 
-
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+    SDImageWebPCoder *webPCoder = [SDImageWebPCoder sharedCoder];
+    [[SDImageCodersManager sharedManager] addCoder:webPCoder];
     self.window = [UIWindow new];
     HomeViewController *rootVC = [HomeViewController new];
     UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:rootVC];

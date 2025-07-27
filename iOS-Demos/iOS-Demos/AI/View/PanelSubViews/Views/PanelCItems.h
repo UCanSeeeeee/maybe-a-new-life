@@ -12,7 +12,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface PanelCItems : UIView
 
-- (void)loadViewWithModel:(Contour *)model andImagePrefix:(NSString *)Prefix andTitle:(NSString *)title;
+- (void)loadViewWithTitle:(NSString *)title imageStr:(NSString *)imageStr values:(NSArray *)values;
 
 @end
 

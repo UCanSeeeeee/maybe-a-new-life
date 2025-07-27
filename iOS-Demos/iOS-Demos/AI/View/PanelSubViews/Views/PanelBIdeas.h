@@ -12,7 +12,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface PanelBIdeas : UIView
 
-- (void)loadViewWithModel:(StylePositioning *)model;
+- (void)loadView;
 
 @end
 

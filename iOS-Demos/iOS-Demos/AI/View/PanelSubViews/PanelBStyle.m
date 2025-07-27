@@ -10,9 +10,11 @@
 #import "PanelBStarsCard.h"
 #import "PanelBCells.h"
 #import "PanelBIdeas.h"
-
+#import "BaseFoundation.h"
+#import "GlobalModel.h"
+#import "PanelBDetailModel.h"
 @interface PanelBStyle ()
-
+@property (nonatomic, strong) PanelBDetailModel *dataModel;
 @property (nonatomic, strong) UIView *viewsContainer;
 @property (nonatomic, strong) UIView *titleImageView;
 @property (nonatomic, strong) UILabel *titleLabel;
@@ -33,7 +35,7 @@
 - (void)setupSubviews {
     self.viewsContainer = [UIView new];
     self.viewsContainer.size = CGSizeMake(kScreenWidth - 32, 1000);
-    self.viewsContainer.left = 16;
+    self.viewsContainer.left = 0;
     self.viewsContainer.backgroundColor = [UIColor colorWithHexString:@"#FFF2F0"];
     self.viewsContainer.layer.cornerRadius = 20;
     [self addSubview:self.viewsContainer];
@@ -56,11 +58,13 @@
     self.titleLabel.left = self.titleImageView.right + 3;
 }
 
-- (void)loadViewWithModel:(StylePositioning *)model {
-    
+- (void)loadView {
+    GlobalModel *tempModel = GlobalToolHandler.fetchGlobalModel;
+    self.dataModel = tempModel.panelBDetailModel;
+    NSLog(@"chieh B %@", self.dataModel);
     UILabel *summaryLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, self.viewsContainer.width - 32, 24)];
     [self.viewsContainer addSubview:summaryLabel];
-    summaryLabel.text = model.conclusion;
+    summaryLabel.text = self.dataModel.conclusionStyleString;
     summaryLabel.font = [UIFont boldSystemFontOfSize:14];
     summaryLabel.textColor = [UIColor blackColor];
     [summaryLabel sizeToFit];
@@ -76,17 +80,17 @@
     bgContainer.left = 4;
     bgContainer.top = summaryLabel.bottom + 8;
 
-    PanelBItemsContainer *gridView = [[PanelBItemsContainer alloc] initWithFrame:CGRectMake(0, 0, 260 * kScreenRatio, 172 * kScreenRatio)];
+    PanelBItemsContainer *gridView = [[PanelBItemsContainer alloc] init];
     [bgContainer addSubview:gridView];
+    [gridView setHighlightedStyle:self.dataModel.conclusionStyleString highlightColor:[UIColor colorWithHexString:@"#FFE6E0"]];
     gridView.centerX = bgContainer.width / 2.0;
     gridView.top = 22.5;
-    [gridView setHighlightedStyle:@"自然型" highlightColor:[UIColor colorWithHexString:@"#FFE6E0"]];
     
     PanelBStarsCard *starsCard = [[PanelBStarsCard alloc] initWithFrame:CGRectMake(0, 0, 297 * kScreenRatio, 101 * kScreenRatio)];
     [bgContainer addSubview:starsCard];
     starsCard.centerX = bgContainer.width / 2.0;
     starsCard.top = gridView.bottom + 10;
-    [starsCard loadViewWithModel:model];
+    [starsCard loadView];
     
     UILabel *shapeTitleLabel = [[UILabel alloc] init];
     [bgContainer addSubview:shapeTitleLabel];
@@ -96,15 +100,18 @@
     [shapeTitleLabel sizeToFit];
     shapeTitleLabel.top = starsCard.bottom + 16;
     shapeTitleLabel.left = 12;
+    __block UIView *lastView = shapeTitleLabel;
+    [self.dataModel.key_corrections enumerateObjectsUsingBlock:^(NSDictionary * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        KeyCorrectionModel *tempModel = [[KeyCorrectionModel alloc] initWithDictionary:obj error:nil];
+        PanelBCells *cellA = [PanelBCells new];
+        [bgContainer addSubview:cellA];
+        cellA.size = CGSizeMake(self.width - 30, 0);
+        cellA.left = 13;
+        cellA.top = lastView.bottom + 10;
+        lastView = cellA;
+        [cellA loadViewWithTitle:tempModel.disadvantage andContent:tempModel.suggestion];
+    }];
     
-    PanelBCells *cellA = [PanelBCells new];
-    [bgContainer addSubview:cellA];
-    cellA.size = CGSizeMake(self.width - 30, 0);
-    cellA.left = 13;
-    cellA.top = shapeTitleLabel.bottom + 10;
-    // 🌟这里要处理一下数据
-    [cellA loadViewWithTitle:@"中庭偏长" andContent:@"中庭偏长中庭偏长中庭偏长中庭偏长中庭偏长中庭偏长中庭偏长中庭偏长中庭偏长中庭偏长中庭偏长中庭偏长中庭偏长中庭偏长中庭偏长"];
-
     // 五官标题
     UILabel *featuresTitleLabel = [[UILabel alloc] init];
     [bgContainer addSubview:featuresTitleLabel];
@@ -112,12 +119,12 @@
     featuresTitleLabel.font = [UIFont systemFontOfSize:14 weight:UIFontWeightMedium];
     featuresTitleLabel.textColor = [UIColor colorWithHexString:@"#262626"];
     [featuresTitleLabel sizeToFit];
-    featuresTitleLabel.top = cellA.bottom + 16;
+    featuresTitleLabel.top = lastView.bottom + 16;
     featuresTitleLabel.left = 12;
     
     PanelBIdeas *ideasView = [[PanelBIdeas alloc] initWithFrame:CGRectMake(0, featuresTitleLabel.bottom + 8, self.width, 0)];
     [bgContainer addSubview:ideasView];
-    [ideasView loadViewWithModel:model];
+    [ideasView loadView];
     
     bgContainer.height = ideasView.bottom + 12;
     self.viewsContainer.height = bgContainer.bottom + 4;

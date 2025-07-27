@@ -6,13 +6,12 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "BaseFoundation.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface PanelCMakeup : UIView
 
-- (void)loadViewWithModel:(MakeupRecommendation *)model;
+- (void)loadView;
 
 @end
 

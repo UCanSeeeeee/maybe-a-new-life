@@ -6,6 +6,8 @@
 //
 
 #import "PanelBIdeas.h"
+#import "GlobalModel.h"
+#import "PanelBDetailModel.h"
 
 @interface PanelBIdeas ()
 
@@ -13,8 +15,8 @@
 
 @implementation PanelBIdeas
 
-- (void)loadViewWithModel:(StylePositioning *)model {
-    
+- (void)loadView {
+    GlobalModel *tempModel = [GlobalToolHandler fetchGlobalModel];
     UIView *containerView = [UIView new];
     [self addSubview:containerView];
     containerView.width = self.width - 38;
@@ -24,7 +26,7 @@
     containerView.layer.cornerRadius = 9.5;
     UILabel *titleLabel = [UILabel new];
     [self addSubview:titleLabel];
-    titleLabel.text = model.makeup_strategy;
+    titleLabel.text = tempModel.panelBDetailModel.makeupStrategyKeyString;
     titleLabel.font = [UIFont systemFontOfSize:13 weight:UIFontWeightSemibold];
     titleLabel.textColor = [UIColor colorWithHexString:@"#262626"];
     [titleLabel sizeToFit];
@@ -36,9 +38,9 @@
     
     UIFont *textFont = [UIFont systemFontOfSize:13];
     UIColor *textColor = [UIColor colorWithHexString:@"#333333"];
-    
-    for (NSInteger i = 0; i < model.makeup_focus_points.count; i++) {
-        NSString *text = [NSString stringWithFormat:@"%ld·   %@", (long)i + 1, model.makeup_focus_points[i]];
+    NSArray *tempArr = tempModel.panelBDetailModel.makeupStrategyValueArray;
+    for (NSInteger i = 0; i < tempArr.count; i++) {
+        NSString *text = [NSString stringWithFormat:@"%ld·   %@", (long)i + 1, tempArr[i]];
         
         UILabel *label = [[UILabel alloc] init];
         label.text = text;

@@ -6,17 +6,9 @@
 //
 
 #import "InfoPanelView.h"
-#import "PanelDSummary.h"
-#import "PanelAFace.h"
-#import "PanelBStyle.h"
-#import "PanelCMakeup.h"
+#import "BaseFoundation.h"
 
 @interface InfoPanelView ()
-
-@property (nonatomic, strong) PanelDSummary *topView;
-@property (nonatomic, strong) PanelAFace *faceView;
-@property (nonatomic, strong) PanelBStyle *styleView;
-@property (nonatomic, strong) PanelCMakeup *makeupView;
 
 
 @end
@@ -35,8 +27,6 @@
 }
 
 - (void)setupSubviews {
-    self.topView = [PanelDSummary new];
-    [self addSubview:self.topView];
     self.faceView = [PanelAFace new];
     [self addSubview:self.faceView];
     self.styleView = [PanelBStyle new];
@@ -45,18 +35,17 @@
     [self addSubview:self.makeupView];
 }
 
-- (void)loadViewWithModel:(AIResult *)model {
-    [self.topView loadViewWithModel:model.summary];
-    self.topView.top = 20;
-    [self.faceView loadViewWithModel:model.face_analysis];
-    self.faceView.top = self.topView.bottom + 10;
-    [self.styleView loadViewWithModel:model.style_positioning];
+- (void)loadView {
+    [self.faceView loadView];
+    self.faceView.centerX = self.width / 2.0;
+    [self.styleView loadView];
     self.styleView.top = self.faceView.bottom + 10;
-    [self.makeupView loadViewWithModel:model.makeup_recommendation];
+    self.styleView.centerX = self.width / 2.0;
+    [self.makeupView loadView];
     self.makeupView.top = self.styleView.bottom + 10;
+    self.makeupView.centerX = self.width / 2.0;
     self.height = self.makeupView.bottom + SafeAreaBottomHeight;
     
 }
-
 
 @end

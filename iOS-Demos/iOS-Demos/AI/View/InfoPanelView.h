@@ -6,13 +6,20 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "BaseFoundation.h"
+#import "PanelAFace.h"
+#import "PanelBStyle.h"
+#import "PanelCMakeup.h"
 
 NS_ASSUME_NONNULL_BEGIN
+@class AIResult;
 
 @interface InfoPanelView : UIView
 
-- (void)loadViewWithModel:(AIResult *)model;
+@property (nonatomic, strong) PanelAFace *faceView;
+@property (nonatomic, strong) PanelBStyle *styleView;
+@property (nonatomic, strong) PanelCMakeup *makeupView;
+
+- (void)loadView;
 
 @end
 
