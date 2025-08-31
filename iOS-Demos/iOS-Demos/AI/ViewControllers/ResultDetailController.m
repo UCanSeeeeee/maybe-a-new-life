@@ -1,15 +1,15 @@
 //
-//  ScanViewController.m
+//  ResultDetailController.m
 //  iOS-Demos
 //
 //  Created by Chieh on 2025/5/29.
 //
 
-#import "ScanViewController.h"
+#import "ResultDetailController.h"
 #import "BaseFoundation.h"
 #import "PanelDSummary.h"
 
-@interface ScanViewController () <UIGestureRecognizerDelegate>
+@interface ResultDetailController () <UIGestureRecognizerDelegate>
 
 @property (nonatomic, strong) UIView *panelContainer;        // 外部容器
 @property (nonatomic, strong) PanelDSummary *topView;
@@ -23,9 +23,11 @@
 @property (nonatomic, strong) NSArray<UIButton *> *sectionButtons;  // 分段按钮数组
 @property (nonatomic, assign) NSInteger currentSectionIndex;  // 当前选中的段落索引
 
+// 拍照后的照片
+@property (nonatomic, strong) UIImageView *photoPreviewImageView;
 @end
 
-@implementation ScanViewController
+@implementation ResultDetailController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -33,6 +35,19 @@
     self.panelTopLimit = 100;
     self.contentScrollY = 0;
     self.isPanelAtTop = NO;
+    
+    self.photoPreviewImageView = [[UIImageView alloc] initWithFrame:self.view.bounds];
+    self.photoPreviewImageView.image = [GlobalToolHandler fetchGlobalModel].userPhotoImage;
+    self.photoPreviewImageView.contentMode = UIViewContentModeScaleAspectFill;
+    self.photoPreviewImageView.backgroundColor = [UIColor clearColor];
+    [self.view addSubview:self.photoPreviewImageView];
+    
+    // 顶部左侧返回按钮
+    UIButton *backButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    [backButton setImage:[UIImage imageNamed:@"photo_back_icon"] forState:UIControlStateNormal];
+    backButton.frame = CGRectMake(20, 50, 40, 40);
+    [backButton addTarget:self action:@selector(dismissViewController) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:backButton];
     
     // 设置面板视图
     [self setupPanelView];
@@ -322,6 +337,10 @@
     [UIView animateWithDuration:0.3 animations:^{
         [self updatePanelPosition:targetPosition];
     }];
+}
+
+- (void)dismissViewController {
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 @end

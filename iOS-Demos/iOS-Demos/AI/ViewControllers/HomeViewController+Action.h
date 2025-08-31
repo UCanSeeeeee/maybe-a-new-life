@@ -12,6 +12,8 @@ NS_ASSUME_NONNULL_BEGIN
 @interface HomeViewController (Action)
 
 - (void)showSettingPopup;
+- (void)takePhotosVC;
+- (void)jumpConclusionVC;
 
 @end
 

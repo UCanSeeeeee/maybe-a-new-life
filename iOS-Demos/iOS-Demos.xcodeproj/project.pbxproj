@@ -14,7 +14,7 @@
 		D1102C5B2DE320D7000AB7B1 /* SettingPopupView.m in Sources */ = {isa = PBXBuildFile; fileRef = D1102C5A2DE320D7000AB7B1 /* SettingPopupView.m */; };
 		D1102C5E2DE32169000AB7B1 /* HomeViewController+Action.m in Sources */ = {isa = PBXBuildFile; fileRef = D1102C5D2DE32169000AB7B1 /* HomeViewController+Action.m */; };
 		D1102C612DE8AB38000AB7B1 /* InfoPanelView.m in Sources */ = {isa = PBXBuildFile; fileRef = D1102C602DE8AB38000AB7B1 /* InfoPanelView.m */; };
-		D1102C652DE8AB6D000AB7B1 /* ScanViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D1102C642DE8AB6D000AB7B1 /* ScanViewController.m */; };
+		D1102C652DE8AB6D000AB7B1 /* ResultDetailController.m in Sources */ = {isa = PBXBuildFile; fileRef = D1102C642DE8AB6D000AB7B1 /* ResultDetailController.m */; };
 		D1102C752DF420CE000AB7B1 /* PanelDSummary.m in Sources */ = {isa = PBXBuildFile; fileRef = D1102C742DF420CE000AB7B1 /* PanelDSummary.m */; };
 		D1102C782DF48236000AB7B1 /* PanelAFace.m in Sources */ = {isa = PBXBuildFile; fileRef = D1102C772DF48236000AB7B1 /* PanelAFace.m */; };
 		D1102C7B2DF4824A000AB7B1 /* PanelBStyle.m in Sources */ = {isa = PBXBuildFile; fileRef = D1102C7A2DF4824A000AB7B1 /* PanelBStyle.m */; };
@@ -42,6 +42,9 @@
 		D1F603602E360B0F004B4901 /* CenterToastView.m in Sources */ = {isa = PBXBuildFile; fileRef = D1F6035F2E360B0F004B4901 /* CenterToastView.m */; };
 		D1F603632E360D03004B4901 /* UIViewController+DeallocLogging.m in Sources */ = {isa = PBXBuildFile; fileRef = D1F603622E360D03004B4901 /* UIViewController+DeallocLogging.m */; };
 		D1F603652E362B93004B4901 /* home_center.webp in Resources */ = {isa = PBXBuildFile; fileRef = D1F603642E362B93004B4901 /* home_center.webp */; };
+		D1F603682E50A60A004B4901 /* GlobalToolHandler+Jump.m in Sources */ = {isa = PBXBuildFile; fileRef = D1F603672E50A60A004B4901 /* GlobalToolHandler+Jump.m */; };
+		D1F6036B2E50AB56004B4901 /* scanning.webp in Resources */ = {isa = PBXBuildFile; fileRef = D1F6036A2E50AB56004B4901 /* scanning.webp */; };
+		D1F6036E2E50ADA9004B4901 /* GlobalToolHandler+Permission.m in Sources */ = {isa = PBXBuildFile; fileRef = D1F6036D2E50ADA9004B4901 /* GlobalToolHandler+Permission.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -58,8 +61,8 @@
 		D1102C5D2DE32169000AB7B1 /* HomeViewController+Action.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "HomeViewController+Action.m"; sourceTree = "<group>"; };
 		D1102C5F2DE8AB38000AB7B1 /* InfoPanelView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = InfoPanelView.h; sourceTree = "<group>"; };
 		D1102C602DE8AB38000AB7B1 /* InfoPanelView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = InfoPanelView.m; sourceTree = "<group>"; };
-		D1102C632DE8AB6D000AB7B1 /* ScanViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ScanViewController.h; sourceTree = "<group>"; };
-		D1102C642DE8AB6D000AB7B1 /* ScanViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ScanViewController.m; sourceTree = "<group>"; };
+		D1102C632DE8AB6D000AB7B1 /* ResultDetailController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ResultDetailController.h; sourceTree = "<group>"; };
+		D1102C642DE8AB6D000AB7B1 /* ResultDetailController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ResultDetailController.m; sourceTree = "<group>"; };
 		D1102C732DF420CE000AB7B1 /* PanelDSummary.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PanelDSummary.h; sourceTree = "<group>"; };
 		D1102C742DF420CE000AB7B1 /* PanelDSummary.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PanelDSummary.m; sourceTree = "<group>"; };
 		D1102C762DF48236000AB7B1 /* PanelAFace.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PanelAFace.h; sourceTree = "<group>"; };
@@ -113,6 +116,12 @@
 		D1F603612E360D03004B4901 /* UIViewController+DeallocLogging.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "UIViewController+DeallocLogging.h"; sourceTree = "<group>"; };
 		D1F603622E360D03004B4901 /* UIViewController+DeallocLogging.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "UIViewController+DeallocLogging.m"; sourceTree = "<group>"; };
 		D1F603642E362B93004B4901 /* home_center.webp */ = {isa = PBXFileReference; lastKnownFileType = file; path = home_center.webp; sourceTree = "<group>"; };
+		D1F603662E50A60A004B4901 /* GlobalToolHandler+Jump.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "GlobalToolHandler+Jump.h"; sourceTree = "<group>"; };
+		D1F603672E50A60A004B4901 /* GlobalToolHandler+Jump.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "GlobalToolHandler+Jump.m"; sourceTree = "<group>"; };
+		D1F603692E50A871004B4901 /* CWViewsFoundation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CWViewsFoundation.h; sourceTree = "<group>"; };
+		D1F6036A2E50AB56004B4901 /* scanning.webp */ = {isa = PBXFileReference; lastKnownFileType = file; path = scanning.webp; sourceTree = "<group>"; };
+		D1F6036C2E50ADA9004B4901 /* GlobalToolHandler+Permission.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "GlobalToolHandler+Permission.h"; sourceTree = "<group>"; };
+		D1F6036D2E50ADA9004B4901 /* GlobalToolHandler+Permission.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "GlobalToolHandler+Permission.m"; sourceTree = "<group>"; };
 		D22AD10B005316F36FCEB309 /* Pods_iOS_Demos.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_iOS_Demos.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D55B28BA9B7BBF6094596E69 /* Pods-iOS-Demos.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-iOS-Demos.release.xcconfig"; path = "Target Support Files/Pods-iOS-Demos/Pods-iOS-Demos.release.xcconfig"; sourceTree = "<group>"; };
 		DF8D01ED42D8361A59A1E4E3 /* Pods-iOS-Demos.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-iOS-Demos.debug.xcconfig"; path = "Target Support Files/Pods-iOS-Demos/Pods-iOS-Demos.debug.xcconfig"; sourceTree = "<group>"; };
@@ -156,6 +165,7 @@
 				D13199AC2DE0D3130083B629 /* AppDelegate.h */,
 				D13199AD2DE0D3130083B629 /* AppDelegate.m */,
 				D1F603642E362B93004B4901 /* home_center.webp */,
+				D1F6036A2E50AB56004B4901 /* scanning.webp */,
 				D13199AE2DE0D3130083B629 /* Assets.xcassets */,
 				D13199B22DE0D3130083B629 /* main.m */,
 				D13199B72DE0D3130083B629 /* ViewController.h */,
@@ -163,6 +173,7 @@
 				D1102C532DE2FA73000AB7B1 /* BaseFoundation.h */,
 				D1F603612E360D03004B4901 /* UIViewController+DeallocLogging.h */,
 				D1F603622E360D03004B4901 /* UIViewController+DeallocLogging.m */,
+				D1F603692E50A871004B4901 /* CWViewsFoundation.h */,
 			);
 			path = Base;
 			sourceTree = "<group>";
@@ -207,12 +218,12 @@
 				D1102C4C2DE2F84C000AB7B1 /* HomeViewController.m */,
 				D1102C5C2DE32169000AB7B1 /* HomeViewController+Action.h */,
 				D1102C5D2DE32169000AB7B1 /* HomeViewController+Action.m */,
-				D1102C632DE8AB6D000AB7B1 /* ScanViewController.h */,
-				D1102C642DE8AB6D000AB7B1 /* ScanViewController.m */,
 				D1102C952DFE8310000AB7B1 /* TakePhotosViewController.h */,
 				D1102C962DFE8310000AB7B1 /* TakePhotosViewController.m */,
 				D1102CB22E2B7A7C000AB7B1 /* ConclusionViewController.h */,
 				D1102CB32E2B7A7C000AB7B1 /* ConclusionViewController.m */,
+				D1102C632DE8AB6D000AB7B1 /* ResultDetailController.h */,
+				D1102C642DE8AB6D000AB7B1 /* ResultDetailController.m */,
 			);
 			path = ViewControllers;
 			sourceTree = "<group>";
@@ -222,6 +233,10 @@
 			children = (
 				D1102C982E2218CA000AB7B1 /* GlobalToolHandler.h */,
 				D1102C992E2218CA000AB7B1 /* GlobalToolHandler.m */,
+				D1F6036C2E50ADA9004B4901 /* GlobalToolHandler+Permission.h */,
+				D1F6036D2E50ADA9004B4901 /* GlobalToolHandler+Permission.m */,
+				D1F603662E50A60A004B4901 /* GlobalToolHandler+Jump.h */,
+				D1F603672E50A60A004B4901 /* GlobalToolHandler+Jump.m */,
 				D1F603582E360400004B4901 /* GlobalToolHandler+Promise.h */,
 				D1F603592E360400004B4901 /* GlobalToolHandler+Promise.m */,
 				D1F6035E2E360B0F004B4901 /* CenterToastView.h */,
@@ -363,6 +378,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D1F603652E362B93004B4901 /* home_center.webp in Resources */,
+				D1F6036B2E50AB56004B4901 /* scanning.webp in Resources */,
 				D13199BE2DE0D3130083B629 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -423,9 +439,10 @@
 				D13199BA2DE0D3130083B629 /* AppDelegate.m in Sources */,
 				D1102C7E2DF48287000AB7B1 /* PanelCMakeup.m in Sources */,
 				D1102C852DF710B1000AB7B1 /* PanelBItems.m in Sources */,
-				D1102C652DE8AB6D000AB7B1 /* ScanViewController.m in Sources */,
+				D1102C652DE8AB6D000AB7B1 /* ResultDetailController.m in Sources */,
 				D1102C572DE31875000AB7B1 /* SettingItemModel.m in Sources */,
 				D1102C882DF710D9000AB7B1 /* PanelBItemsContainer.m in Sources */,
+				D1F6036E2E50ADA9004B4901 /* GlobalToolHandler+Permission.m in Sources */,
 				D1102C822DF49299000AB7B1 /* PanelAItems.m in Sources */,
 				D1F603632E360D03004B4901 /* UIViewController+DeallocLogging.m in Sources */,
 				D1102CB12E23FEA2000AB7B1 /* PanelCRecommandModel.m in Sources */,
@@ -434,6 +451,7 @@
 				D1102C9A2E2218CA000AB7B1 /* GlobalToolHandler.m in Sources */,
 				D1102C752DF420CE000AB7B1 /* PanelDSummary.m in Sources */,
 				D1102C972DFE8310000AB7B1 /* TakePhotosViewController.m in Sources */,
+				D1F603682E50A60A004B4901 /* GlobalToolHandler+Jump.m in Sources */,
 				D1102C612DE8AB38000AB7B1 /* InfoPanelView.m in Sources */,
 				D1F603602E360B0F004B4901 /* CenterToastView.m in Sources */,
 				D13199BB2DE0D3130083B629 /* main.m in Sources */,

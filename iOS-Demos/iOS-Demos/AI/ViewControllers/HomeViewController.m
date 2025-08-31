@@ -19,6 +19,7 @@
 @property (nonatomic, strong) UIButton *settingButton;
 @property (nonatomic, strong) SDAnimatedImageView *centerImageView;
 @property (nonatomic, strong) UIButton *mainButton;
+@property (nonatomic, strong) UIButton *lastButton;
 @end
 
 @implementation HomeViewController
@@ -104,11 +105,15 @@
     self.mainButton.layer.cornerRadius = 25;
     [self.mainButton addTarget:self action:@selector(takePhotosVC) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:self.mainButton];
-}
-
-- (void)takePhotosVC {
-    TakePhotosViewController *vc = [TakePhotosViewController new];
-    [self.navigationController pushViewController:vc animated:YES];
+    
+    self.lastButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    self.lastButton.frame = CGRectMake(40, self.mainButton.bottom, self.view.frame.size.width - 80, 56);
+    [self.lastButton setTitle:@"上次检测报告" forState:UIControlStateNormal];
+    [self.lastButton setTitleColor:[UIColor colorWithHexString:@"#999999"] forState:UIControlStateNormal];
+    self.lastButton.backgroundColor = UIColor.clearColor;
+    self.lastButton.titleLabel.font = [UIFont systemFontOfSize:13];
+    [self.lastButton addTarget:self action:@selector(jumpConclusionVC) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:self.lastButton];
 }
 
 @end

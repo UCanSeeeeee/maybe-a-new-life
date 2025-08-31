@@ -17,6 +17,7 @@ target 'iOS-Demos' do
   pod 'libextobjc'
   pod 'JSONModel'
   pod 'PromiseKit'
+  pod 'MMKV'
 
 end
 

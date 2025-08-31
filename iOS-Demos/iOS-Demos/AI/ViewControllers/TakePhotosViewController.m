@@ -76,10 +76,29 @@
     // 添加背景遮罩层
     UIView *maskBackgroundView = [[UIView alloc] initWithFrame:self.view.bounds];
     maskBackgroundView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.3];
+
+    // 创建路径：全屏矩形 + 中间椭圆
+    UIBezierPath *path = [UIBezierPath bezierPathWithRect:maskBackgroundView.bounds];
+    CGFloat ovalWidth = self.view.bounds.size.width - 80;
+    CGFloat ovalHeight = self.view.bounds.size.height * 4.0 / 9.0;
+    CGRect ovalRect = CGRectMake((self.view.bounds.size.width - ovalWidth) / 2.0,
+                                 self.view.bounds.size.height * 0.2,
+                                 ovalWidth,
+                                 ovalHeight);
+    UIBezierPath *ovalPath = [UIBezierPath bezierPathWithOvalInRect:ovalRect];
+    [path appendPath:ovalPath];
+    path.usesEvenOddFillRule = YES;
+
+    // 创建 shapeLayer 作为遮罩
+    CAShapeLayer *maskLayer = [CAShapeLayer layer];
+    maskLayer.path = path.CGPath;
+    maskLayer.fillRule = kCAFillRuleEvenOdd;
+    maskBackgroundView.layer.mask = maskLayer;
+
     [self.view addSubview:maskBackgroundView];
 
     self.photoPreviewImageView = [[UIImageView alloc] initWithFrame:self.view.bounds];
-    self.photoPreviewImageView.contentMode = UIViewContentModeScaleAspectFit;
+    self.photoPreviewImageView.contentMode = UIViewContentModeScaleAspectFill;
     self.photoPreviewImageView.backgroundColor = [UIColor blackColor];
     self.photoPreviewImageView.hidden = YES;
     [self.view addSubview:self.photoPreviewImageView];
@@ -137,13 +156,10 @@ didFinishProcessingPhoto:(AVCapturePhoto *)photo
     UIImage *image = [UIImage imageWithData:data];
     
     // 对前置摄像头拍摄图片做镜像处理
-    UIImage *finalImage = image;
-    AVCaptureDevicePosition position = AVCaptureDevicePositionFront; // 这里我们默认前置摄像头
-    if (position == AVCaptureDevicePositionFront) {
-        finalImage = [UIImage imageWithCGImage:image.CGImage
-                                         scale:image.scale
-                                   orientation:UIImageOrientationLeftMirrored];
-    }
+    
+    UIImage *finalImage = [UIImage imageWithCGImage:image.CGImage
+                                              scale:image.scale
+                                        orientation:UIImageOrientationLeftMirrored];
     [self handlerResultImage:finalImage];
 }
 
@@ -157,23 +173,28 @@ didFinishProcessingPhoto:(AVCapturePhoto *)photo
 - (void)handlerResultImage:(UIImage *)image {
     dispatch_async(dispatch_get_main_queue(), ^{
         self.photoPreviewImageView.image = image;
+        GlobalToolHandler.fetchGlobalModel.imageString = [GlobalToolHandler jsonStringFromImage:image];
         self.photoPreviewImageView.hidden = NO;
         self.hiddenBlock();
     });
     __weak typeof(self) weakSelf = self;
     [CenterToastView showWithText:@"面部特征分析中"];
+    // 请求面部分析
     [GlobalToolHandler requestWithImage:image andCompletion:^(BOOL isSuccess) {
         __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (![GlobalToolHandler isSameVC:strongSelf]) {
+            return;
+        }
         if (isSuccess) {
             NSDate *startTime = [NSDate date];
             [CenterToastView showWithText:@"deepseek总结中"];
+            // 请求deepseek总结
             [GlobalToolHandler requestDeepSeekConclusion:^(BOOL isSuccess) {
                 [CenterToastView showWithText:@"deepseek初步总结成功"];
                 NSLog(@"Chieh request DeepSeek1 请求成功 耗时: %.3f 秒", [[NSDate date] timeIntervalSinceDate:startTime]);
-                ConclusionViewController *vc = [ConclusionViewController new];
-                vc.dataModel = GlobalToolHandler.fetchGlobalModel.conclusionModel;
-                [strongSelf.navigationController pushViewController:vc animated:YES];
+                [GlobalToolHandler pushConclusionVC];
             }];
+            // 请求deepseek细节
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
                 [strongSelf requestWithRetry];
             });

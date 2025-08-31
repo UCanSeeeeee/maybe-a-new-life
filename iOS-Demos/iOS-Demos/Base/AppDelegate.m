@@ -9,6 +9,8 @@
 #import "ViewController.h"
 #import "HomeViewController.h"
 #import <SDWebImageWebPCoder/SDImageWebPCoder.h>
+#import <MMKV/MMKV.h>
+#import "GlobalToolHandler.h"
 
 @interface AppDelegate ()
 
@@ -25,6 +27,8 @@
     nav.navigationBar.hidden = YES;
     self.window.rootViewController = nav;
     [self.window makeKeyAndVisible];
+    [MMKV initializeMMKV:nil];
+    [[GlobalToolHandler sharedInstance] startMonitoring];
     return YES;
 }
 

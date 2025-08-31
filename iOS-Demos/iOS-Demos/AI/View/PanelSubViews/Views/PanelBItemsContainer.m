@@ -73,9 +73,8 @@
     
     self.bgImageView.left = labelV1.right + 2;
     self.bgImageView.top = labelV1.top;
-    self.itemsContainer.left = self.bgImageView.left + 8;
-    self.itemsContainer.top = self.itemsContainer.top;
-    
+    self.itemsContainer.centerY = self.bgImageView.centerY - 1;
+    self.itemsContainer.centerX = self.bgImageView.centerX;
     
     UILabel *labelV2 = [[UILabel alloc] init];
     [self addSubview:labelV2];

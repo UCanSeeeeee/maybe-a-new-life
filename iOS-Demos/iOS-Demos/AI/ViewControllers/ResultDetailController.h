@@ -1,5 +1,5 @@
 //
-//  ScanViewController.h
+//  ResultDetailController.h
 //  iOS-Demos
 //
 //  Created by Chieh on 2025/5/29.
@@ -9,7 +9,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface ScanViewController : ViewController
+@interface ResultDetailController : ViewController
 
 @end
 

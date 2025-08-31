@@ -7,7 +7,7 @@
 
 #import "ConclusionViewController.h"
 #import "BaseFoundation.h"
-#import "ScanViewController.h"
+#import "ResultDetailController.h"
 #import "GlobalToolHandler.h"
 
 @interface ConclusionViewController ()
@@ -24,6 +24,9 @@
 @property (nonatomic, strong) UIButton *saveShareButton;
 @property (nonatomic, strong) UIButton *fullReportButton;
 
+// 拍照后的照片
+@property (nonatomic, strong) UIImageView *photoPreviewImageView;
+
 @end
 
 @implementation ConclusionViewController
@@ -33,6 +36,20 @@
     NSLog(@"chieh Conclusion %@", self.dataModel);
     self.view.backgroundColor = [UIColor colorWithHexString:@"#8E969F"];
 
+    self.photoPreviewImageView = [[UIImageView alloc] initWithFrame:self.view.bounds];
+    self.photoPreviewImageView.image = [GlobalToolHandler fetchGlobalModel].userPhotoImage;
+    self.photoPreviewImageView.contentMode = UIViewContentModeScaleAspectFill;
+    self.photoPreviewImageView.backgroundColor = [UIColor clearColor];
+    [self.view addSubview:self.photoPreviewImageView];
+    // 创建毛玻璃效果
+    UIBlurEffect *blurEffect = [UIBlurEffect effectWithStyle:UIBlurEffectStyleDark]; // 可以换成 ExtraLight 或 Dark
+    UIVisualEffectView *blurView = [[UIVisualEffectView alloc] initWithEffect:blurEffect];
+    blurView.frame = self.photoPreviewImageView.bounds;
+    blurView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight; // 保证旋转或尺寸改变时自适应
+
+    // 添加到 photoPreviewImageView 上
+    [self.photoPreviewImageView addSubview:blurView];
+    
     [self.view addSubview:self.closeButton];
     [self.view addSubview:self.titleLabel];
     [self.view addSubview:self.contentContainer];
@@ -43,6 +60,7 @@
     [self.contentContainer addSubview:self.bottomBG];
     [self.contentContainer addSubview:self.saveShareButton];
     [self.contentContainer addSubview:self.fullReportButton];
+    
 }
  
 #pragma mark - 操作
@@ -51,12 +69,7 @@
 }
 
 - (void)jumpToFaceDetailVC {
-    ScanViewController *vc = [[ScanViewController alloc] init];
-    if (GlobalToolHandler.fetchGlobalModel.canShowPanelInfo) {
-        [self.navigationController pushViewController:vc animated:YES];
-    } else {
-        [CenterToastView showWithText:@"正在分析，请稍后"];
-    }
+    [GlobalToolHandler pushResultDetailVC];
 }
 
 #pragma mark - 状态栏高度
@@ -233,7 +246,7 @@
         _saveShareButton.layer.cornerRadius = 24;
         _saveShareButton.layer.masksToBounds = YES;
 
-        [_saveShareButton setTitle:@"保存并分享" forState:UIControlStateNormal];
+        [_saveShareButton setTitle:@"关注我们" forState:UIControlStateNormal];
         [_saveShareButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
         _saveShareButton.titleLabel.font = [UIFont systemFontOfSize:14 weight:UIFontWeightMedium];
 
@@ -247,6 +260,10 @@
         [_saveShareButton addTarget:self action:@selector(jumpToShare) forControlEvents:UIControlEventTouchUpInside];
     }
     return _saveShareButton;
+}
+
+- (void)jumpToShare {
+    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"xhsdiscover://user/63280d7800000000230254b8"] options:@{} completionHandler:nil];
 }
 
 - (UIButton *)fullReportButton {
