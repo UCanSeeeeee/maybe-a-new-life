@@ -9,6 +9,7 @@
 #import "BaseFoundation.h"
 #import "ResultDetailController.h"
 #import "GlobalToolHandler.h"
+#import <Photos/Photos.h>
 
 @interface ConclusionViewController ()
 @property (nonatomic, strong) UIButton *closeButton;
@@ -70,17 +71,6 @@
 
 - (void)jumpToFaceDetailVC {
     [GlobalToolHandler pushResultDetailVC];
-}
-
-#pragma mark - 状态栏高度
-
-- (CGFloat)statusBarHeight {
-    if (@available(iOS 13.0, *)) {
-        UIWindow *keyWindow = [UIApplication sharedApplication].windows.firstObject;
-        return keyWindow.windowScene.statusBarManager.statusBarFrame.size.height;
-    } else {
-        return [UIApplication sharedApplication].statusBarFrame.size.height;
-    }
 }
 
 #pragma mark - 懒加载视图
@@ -261,7 +251,7 @@
         _saveShareButton.layer.cornerRadius = 24;
         _saveShareButton.layer.masksToBounds = YES;
 
-        [_saveShareButton setTitle:@"关注我们" forState:UIControlStateNormal];
+        [_saveShareButton setTitle:@"分享" forState:UIControlStateNormal];
         [_saveShareButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
         _saveShareButton.titleLabel.font = [UIFont systemFontOfSize:FontSize(14) weight:UIFontWeightMedium];
 
@@ -272,13 +262,433 @@
         // 调整文字和图标间距（左文字右图）
         _saveShareButton.imageEdgeInsets = UIEdgeInsetsMake(0, 107, 0, 0);
         _saveShareButton.titleEdgeInsets = UIEdgeInsetsMake(0, -18, 0, 18);
-        [_saveShareButton addTarget:self action:@selector(jumpToShare) forControlEvents:UIControlEventTouchUpInside];
+        [_saveShareButton addTarget:self action:@selector(saveInPhoteoLibrary) forControlEvents:UIControlEventTouchUpInside];
     }
     return _saveShareButton;
 }
 
-- (void)jumpToShare {
-    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"xhsdiscover://user/63280d7800000000230254b8"] options:@{} completionHandler:nil];
+- (void)saveInPhoteoLibrary {
+    // 检查相册权限
+    [self checkPhotoLibraryPermissionAndSave];
+}
+
+#pragma mark - 海报生成和保存
+
+- (void)checkPhotoLibraryPermissionAndSave {
+    PHAuthorizationStatus status = [PHPhotoLibrary authorizationStatus];
+    
+    if (status == PHAuthorizationStatusAuthorized) {
+        [self generateAndSavePosterImage];
+    } else if (status == PHAuthorizationStatusNotDetermined) {
+        [PHPhotoLibrary requestAuthorization:^(PHAuthorizationStatus status) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if (status == PHAuthorizationStatusAuthorized) {
+                    [self generateAndSavePosterImage];
+                } else {
+                    [self showPermissionDeniedAlert];
+                }
+            });
+        }];
+    } else {
+        [self showPermissionDeniedAlert];
+    }
+}
+
+- (void)generateAndSavePosterImage {
+    // 显示加载提示
+    [self showLoadingIndicator];
+    
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        dispatch_async(dispatch_get_main_queue(), ^{
+            UIImage *posterImage = [self createPosterImage];
+            
+            [self hideLoadingIndicator];
+            
+            if (posterImage) {
+                [self savePosterImageToPhotoLibrary:posterImage];
+            } else {
+                [self showErrorAlert:@"生成海报失败，请重试"];
+            }
+        });
+    });
+}
+
+- (UIImage *)createPosterImage {
+    // 海报尺寸完全按照手机屏幕尺寸
+    CGFloat posterWidth = kScreenWidth;
+    CGFloat posterHeight = kScreenHeight;
+    
+    // 计算二维码区域高度：显著减少空白区域
+    CGFloat qrCodeAreaHeight = posterHeight * 100.0 / 711.0; // 从127大幅调整为100，显著减少空白
+    CGFloat contentAreaHeight = posterHeight - qrCodeAreaHeight;
+    
+    // 创建画布
+    UIGraphicsBeginImageContextWithOptions(CGSizeMake(posterWidth, posterHeight), NO, 0.0);
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    
+    // 1. 绘制统一背景色（与contentContainer保持一致，无分割线）
+    CGContextSetFillColorWithColor(context, self.contentContainer.backgroundColor.CGColor);
+    CGContextFillRect(context, CGRectMake(0, 0, posterWidth, posterHeight));
+    
+    // 2. 绘制内容容器（无圆角版本，保持原始宽高比，不允许拉伸压缩）
+    UIImage *contentImage = [self captureContentContainerWithoutCornerRadius];
+    if (contentImage) {
+        // 保持原始宽高比，不进行任何拉伸压缩
+        CGFloat originalWidth = contentImage.size.width;
+        CGFloat originalHeight = contentImage.size.height;
+        
+        // 如果内容图片超出内容区域，则按原始尺寸居中放置，超出部分会被裁剪
+        // 如果内容图片小于内容区域，则按原始尺寸居中放置
+        CGFloat contentX = (posterWidth - originalWidth) / 2;
+        CGFloat contentY = (contentAreaHeight - originalHeight) / 2;
+        
+        // 确保内容不会绘制到二维码区域
+        if (contentY + originalHeight > contentAreaHeight) {
+            contentY = contentAreaHeight - originalHeight;
+        }
+        if (contentY < 0) {
+            contentY = 0;
+        }
+        
+        // 使用高质量绘制，避免边界锯齿
+        CGContextSetInterpolationQuality(context, kCGInterpolationHigh);
+        CGContextSetShouldAntialias(context, YES);
+        [contentImage drawInRect:CGRectMake(contentX, contentY, originalWidth, originalHeight)];
+        
+        // 在内容图片底部边界处额外绘制一像素的背景色，确保无缝衔接
+        if (contentY + originalHeight <= contentAreaHeight) {
+            CGContextSetFillColorWithColor(context, self.contentContainer.backgroundColor.CGColor);
+            CGContextFillRect(context, CGRectMake(0, contentY + originalHeight, posterWidth, 1));
+        }
+    }
+    
+    // 3. 绘制底部二维码区域（无分割线，与内容区域无缝衔接）
+    [self drawQRCodeAreaInContext:context 
+                            frame:CGRectMake(0, contentAreaHeight, posterWidth, qrCodeAreaHeight)];
+    
+    // 获取最终图片
+    UIImage *posterImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    
+    return posterImage;
+}
+
+- (UIImage *)captureContentContainerWithoutCornerRadius {
+    // 临时移除圆角
+    CGFloat originalCornerRadius = self.contentContainer.layer.cornerRadius;
+    CACornerMask originalMaskedCorners = self.contentContainer.layer.maskedCorners;
+    
+    self.contentContainer.layer.cornerRadius = 0;
+    self.contentContainer.layer.maskedCorners = kCALayerMinXMinYCorner | kCALayerMaxXMinYCorner | kCALayerMinXMaxYCorner | kCALayerMaxXMaxYCorner;
+    
+    // 计算精确的截取高度：只到bottomBG的底部，确保无边界线
+    CGFloat captureHeight = ceil(self.bottomBG.bottom); // 使用ceil确保像素对齐
+    CGFloat containerWidth = self.contentContainer.bounds.size.width;
+    
+    // 创建新的画布，只绘制需要的区域
+    UIGraphicsBeginImageContextWithOptions(CGSizeMake(containerWidth, captureHeight), YES, 0.0);
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    
+    // 设置背景色
+    CGContextSetFillColorWithColor(context, self.contentContainer.backgroundColor.CGColor);
+    CGContextFillRect(context, CGRectMake(0, 0, containerWidth, captureHeight));
+    
+    // 设置抗锯齿和高质量渲染
+    CGContextSetShouldAntialias(context, YES);
+    CGContextSetAllowsAntialiasing(context, YES);
+    CGContextSetInterpolationQuality(context, kCGInterpolationHigh);
+    
+    // 分别绘制各个子视图到精确位置
+    // 1. 绘制 animateImage
+    if (self.animateImage && !self.animateImage.hidden) {
+        CGRect animateFrame = self.animateImage.frame;
+        if (animateFrame.origin.y + animateFrame.size.height <= captureHeight) {
+            [self.animateImage.layer renderInContext:context];
+        }
+    }
+    
+    // 2. 绘制 describeLabel
+    if (self.describeLabel && !self.describeLabel.hidden) {
+        CGRect describeFrame = self.describeLabel.frame;
+        if (describeFrame.origin.y + describeFrame.size.height <= captureHeight) {
+            CGContextSaveGState(context);
+            CGContextTranslateCTM(context, describeFrame.origin.x, describeFrame.origin.y);
+            [self.describeLabel.layer renderInContext:context];
+            CGContextRestoreGState(context);
+        }
+    }
+    
+    // 3. 绘制 ageImage
+    if (self.ageImage && !self.ageImage.hidden) {
+        CGRect ageFrame = self.ageImage.frame;
+        if (ageFrame.origin.y + ageFrame.size.height <= captureHeight) {
+            CGContextSaveGState(context);
+            CGContextTranslateCTM(context, ageFrame.origin.x, ageFrame.origin.y);
+            [self.ageImage.layer renderInContext:context];
+            CGContextRestoreGState(context);
+        }
+    }
+    
+    // 4. 绘制 bottomBG（确保无底部横线）
+    if (self.bottomBG && !self.bottomBG.hidden) {
+        CGRect bottomFrame = self.bottomBG.frame;
+        if (bottomFrame.origin.y < captureHeight) {
+            CGContextSaveGState(context);
+            CGContextTranslateCTM(context, bottomFrame.origin.x, bottomFrame.origin.y);
+            
+            // 临时移除可能的边框
+            CGFloat originalBorderWidth = self.bottomBG.layer.borderWidth;
+            UIColor *originalBorderColor = [UIColor colorWithCGColor:self.bottomBG.layer.borderColor];
+            
+            self.bottomBG.layer.borderWidth = 0;
+            self.bottomBG.layer.borderColor = [UIColor clearColor].CGColor;
+            
+            [self.bottomBG.layer renderInContext:context];
+            
+            // 恢复边框设置
+            self.bottomBG.layer.borderWidth = originalBorderWidth;
+            self.bottomBG.layer.borderColor = originalBorderColor.CGColor;
+            
+            CGContextRestoreGState(context);
+        }
+    }
+    
+    UIImage *contentImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    
+    // 恢复圆角
+    self.contentContainer.layer.cornerRadius = originalCornerRadius;
+    self.contentContainer.layer.maskedCorners = originalMaskedCorners;
+    
+    return contentImage;
+}
+
+- (void)drawQRCodeAreaInContext:(CGContextRef)context frame:(CGRect)frame {
+    // 二维码区域背景色与内容区域完全一致，无分割线
+    // 注意：不重复绘制背景，避免产生视觉分割线
+    
+    // 布局参数
+    CGFloat margin = 25; // 左右边距
+    
+    // 二维码整体大小：调整比例以适应新的区域高度
+    CGFloat qrTotalSize = frame.size.height * 70.0 / 100.0; // 调整比例适应新的100/711区域
+    CGFloat qrBorderWidth = 6.5; // 二维码白色边框宽度
+    CGFloat qrSize = qrTotalSize - qrBorderWidth * 2; // 实际二维码大小
+    
+    CGFloat spacing = 12; // 图标和文字间距
+    
+    // === 左侧区域：图标 + 文案 ===
+    CGFloat leftAreaX = frame.origin.x + margin;
+    CGFloat leftAreaY = frame.origin.y;
+    
+    // 1. 绘制左侧图标（使用App图标或自定义图标）
+    UIImage *appIcon = [UIImage imageNamed:@"home_top_center_image"];
+    CGFloat iconX = leftAreaX;
+    CGFloat iconY = leftAreaY + 0; // 进一步上移至3pt，最大化减少空白
+    [appIcon drawInRect:CGRectMake(iconX, iconY, 20 * appIcon.size.width / appIcon.size.height , 20)];
+    
+    // 2. 绘制文案
+    NSString *slogan = @"智绘容颜，Ai定义美学新维度";
+    NSDictionary *textAttributes = @{
+        NSFontAttributeName: [UIFont systemFontOfSize:FontSize(12) weight:UIFontWeightMedium],
+        NSForegroundColorAttributeName: [UIColor colorWithHexString:@"#000000"]
+    };
+    
+    CGFloat textX = iconX;
+    CGFloat textY = iconY + 20 + spacing;
+    
+    [slogan drawAtPoint:CGPointMake(textX, textY) withAttributes:textAttributes];
+    
+    // === 右侧区域：二维码 + 白色边框 ===
+    UIImage *qrCodeImage = [self generateQRCodeImageWithSize:qrSize];
+    if (qrCodeImage) {
+        // 计算二维码位置（右对齐，Y位置上移减少空白）
+        CGFloat qrAreaX = frame.origin.x + frame.size.width - margin - qrTotalSize;
+        CGFloat qrAreaY = frame.origin.y - 10; // 进一步上移至3pt，最大化减少空白
+        
+        // 绘制带圆角的白色边框
+        UIBezierPath *borderPath = [UIBezierPath bezierPathWithRoundedRect:CGRectMake(qrAreaX, qrAreaY, qrTotalSize, qrTotalSize) 
+                                                              cornerRadius:6.5];
+        CGContextSetFillColorWithColor(context, [UIColor whiteColor].CGColor);
+        CGContextAddPath(context, borderPath.CGPath);
+        CGContextFillPath(context);
+        
+        // 绘制二维码（也需要圆角裁剪）
+        CGFloat qrX = qrAreaX + qrBorderWidth;
+        CGFloat qrY = qrAreaY + qrBorderWidth;
+        
+        // 保存图形状态
+        CGContextSaveGState(context);
+        
+        // 创建二维码的圆角裁剪路径
+        UIBezierPath *qrClipPath = [UIBezierPath bezierPathWithRoundedRect:CGRectMake(qrX, qrY, qrSize, qrSize) 
+                                                              cornerRadius:6.5 - qrBorderWidth];
+        CGContextAddPath(context, qrClipPath.CGPath);
+        CGContextClip(context);
+        
+        // 绘制二维码
+        [qrCodeImage drawInRect:CGRectMake(qrX, qrY, qrSize, qrSize)];
+        
+        // 恢复图形状态
+        CGContextRestoreGState(context);
+    }
+}
+
+- (UIImage *)getAppIconImage {
+    // 尝试获取App图标
+    NSDictionary *infoPlist = [[NSBundle mainBundle] infoDictionary];
+    NSArray *iconFiles = infoPlist[@"CFBundleIcons"][@"CFBundlePrimaryIcon"][@"CFBundleIconFiles"];
+    
+    if (iconFiles.count > 0) {
+        NSString *iconName = iconFiles.lastObject; // 获取最大的图标
+        UIImage *appIcon = [UIImage imageNamed:iconName];
+        if (appIcon) {
+            return appIcon;
+        }
+    }
+    
+    // 如果获取不到App图标，使用默认图标或自定义图标
+    UIImage *defaultIcon = [UIImage imageNamed:@"home_top_center_image"]; // 使用项目中的图标
+    if (defaultIcon) {
+        return defaultIcon;
+    }
+    
+    // 如果都没有，创建一个简单的占位图标
+    return [self createPlaceholderIcon];
+}
+
+- (UIImage *)createPlaceholderIcon {
+    CGFloat size = 40;
+    UIGraphicsBeginImageContextWithOptions(CGSizeMake(size, size), NO, 0.0);
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    
+    // 绘制圆形背景
+    CGContextSetFillColorWithColor(context, [UIColor colorWithHexString:@"#AFAC8C"].CGColor);
+    CGContextFillEllipseInRect(context, CGRectMake(0, 0, size, size));
+    
+    // 绘制文字
+    NSString *text = @"AI";
+    NSDictionary *attributes = @{
+        NSFontAttributeName: [UIFont boldSystemFontOfSize:16],
+        NSForegroundColorAttributeName: [UIColor whiteColor]
+    };
+    
+    CGSize textSize = [text sizeWithAttributes:attributes];
+    CGFloat textX = (size - textSize.width) / 2;
+    CGFloat textY = (size - textSize.height) / 2;
+    
+    [text drawAtPoint:CGPointMake(textX, textY) withAttributes:attributes];
+    
+    UIImage *placeholderIcon = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    
+    return placeholderIcon;
+}
+
+- (UIImage *)generateQRCodeImageWithSize:(CGFloat)targetSize {
+    // 生成二维码的内容（可以是App下载链接、网站链接等）
+    // ⭐️
+    NSString *qrContent = @"https://your-app-link.com"; // 替换为实际的链接
+    
+    CIFilter *qrFilter = [CIFilter filterWithName:@"CIQRCodeGenerator"];
+    [qrFilter setValue:[qrContent dataUsingEncoding:NSUTF8StringEncoding] forKey:@"inputMessage"];
+    [qrFilter setValue:@"H" forKey:@"inputCorrectionLevel"];
+    
+    CIImage *qrImage = qrFilter.outputImage;
+    if (!qrImage) return nil;
+    
+    // 根据目标尺寸动态调整二维码大小
+    CGFloat scaleX = targetSize / qrImage.extent.size.width;
+    CGFloat scaleY = targetSize / qrImage.extent.size.height;
+    qrImage = [qrImage imageByApplyingTransform:CGAffineTransformMakeScale(scaleX, scaleY)];
+    
+    // 转换为UIImage
+    CIContext *context = [CIContext context];
+    CGImageRef cgImage = [context createCGImage:qrImage fromRect:qrImage.extent];
+    UIImage *uiImage = [UIImage imageWithCGImage:cgImage];
+    CGImageRelease(cgImage);
+    
+    return uiImage;
+}
+
+// 保留原方法以防其他地方调用
+- (UIImage *)generateQRCodeImage {
+    return [self generateQRCodeImageWithSize:60]; // 默认60px
+}
+
+- (void)savePosterImageToPhotoLibrary:(UIImage *)posterImage {
+    [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
+        [PHAssetCreationRequest creationRequestForAssetFromImage:posterImage];
+    } completionHandler:^(BOOL success, NSError * _Nullable error) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (success) {
+                [self showSuccessAlert:@"海报已保存到相册"];
+            } else {
+                NSString *errorMessage = error ? error.localizedDescription : @"保存失败，请重试";
+                [self showErrorAlert:errorMessage];
+            }
+        });
+    }];
+}
+
+#pragma mark - 提示框和加载指示器
+
+- (void)showLoadingIndicator {
+    // 简单的加载提示
+    UIAlertController *loadingAlert = [UIAlertController alertControllerWithTitle:@"正在生成海报..." 
+                                                                          message:nil 
+                                                                   preferredStyle:UIAlertControllerStyleAlert];
+    [self presentViewController:loadingAlert animated:YES completion:nil];
+}
+
+- (void)hideLoadingIndicator {
+    if (self.presentedViewController && [self.presentedViewController isKindOfClass:[UIAlertController class]]) {
+        [self.presentedViewController dismissViewControllerAnimated:YES completion:nil];
+    }
+}
+
+- (void)showSuccessAlert:(NSString *)message {
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"成功" 
+                                                                   message:message 
+                                                            preferredStyle:UIAlertControllerStyleAlert];
+    UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"确定" 
+                                                       style:UIAlertActionStyleDefault 
+                                                     handler:nil];
+    [alert addAction:okAction];
+    [self presentViewController:alert animated:YES completion:nil];
+}
+
+- (void)showErrorAlert:(NSString *)message {
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"提示" 
+                                                                   message:message 
+                                                            preferredStyle:UIAlertControllerStyleAlert];
+    UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"确定" 
+                                                       style:UIAlertActionStyleDefault 
+                                                     handler:nil];
+    [alert addAction:okAction];
+    [self presentViewController:alert animated:YES completion:nil];
+}
+
+- (void)showPermissionDeniedAlert {
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"需要相册权限" 
+                                                                   message:@"请在设置中开启相册访问权限以保存海报" 
+                                                            preferredStyle:UIAlertControllerStyleAlert];
+    
+    UIAlertAction *settingsAction = [UIAlertAction actionWithTitle:@"去设置" 
+                                                             style:UIAlertActionStyleDefault 
+                                                           handler:^(UIAlertAction * _Nonnull action) {
+        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString] 
+                                           options:@{} 
+                                 completionHandler:nil];
+    }];
+    
+    UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"取消" 
+                                                           style:UIAlertActionStyleCancel 
+                                                         handler:nil];
+    
+    [alert addAction:settingsAction];
+    [alert addAction:cancelAction];
+    [self presentViewController:alert animated:YES completion:nil];
 }
 
 - (UIButton *)fullReportButton {

@@ -17,6 +17,11 @@ static const CGFloat kSectionButtonHeight = 40.0;  // 分段按钮高度
 static const CGFloat kContentTopMargin = 20.0;     // 内容顶部边距
 static const CGFloat kContentBottomMargin = 20.0;  // 内容底部边距
 static const CGFloat kSectionSpacing = 10.0;       // 区块间距
+static const CGFloat kPopupImageViewHeight = 314.5; // 弹窗图片高度
+static const CGFloat kPopupAnimationDuration = 0.3; // 弹窗动画时长
+
+// MARK: - User Defaults Keys
+static NSString * const kMakeupPopupShownKey = @"MakeupPopupHasBeenShown";
 
 // MARK: - Section Types
 typedef NS_ENUM(NSInteger, ResultSection) {
@@ -39,6 +44,11 @@ typedef NS_ENUM(NSInteger, ResultSection) {
 @property (nonatomic, strong) NSArray<UIButton *> *segmentButtons;  // 分段按钮数组
 @property (nonatomic, assign) ResultSection currentSection;         // 当前选中的段落
 @property (nonatomic, assign) CGFloat segmentedControlOriginalY;    // segmentedControlView的原始Y坐标
+
+// MARK: - Popup Components
+@property (nonatomic, strong) UIImageView *makeupPopupImageView;    // 妆容推荐弹窗图片
+@property (nonatomic, assign) BOOL isPopupShown;                    // 弹窗是否已显示
+@property (nonatomic, assign) BOOL hasReachedMakeupSection;         // 是否已到达妆容推荐区域
 
 @end
 
@@ -117,6 +127,7 @@ typedef NS_ENUM(NSInteger, ResultSection) {
     [self setupSummaryView];
     [self setupSegmentedControl];
     [self setupDetailPanelView];
+    [self setupMakeupPopupImageView];
     [self updateScrollViewContentSize];
 }
 
@@ -155,6 +166,41 @@ typedef NS_ENUM(NSInteger, ResultSection) {
     [self.scrollContentView bringSubviewToFront:self.segmentedControlView];
     [self.detailPanelView loadAndLayoutPanels];
     self.detailPanelView.top = self.segmentedControlView.bottom + kSectionSpacing;
+}
+
+- (void)setupMakeupPopupImageView {
+    // 检查用户是否已经看过弹窗
+//    if ([self hasMakeupPopupBeenShown]) {
+//        return;
+//    }
+    
+    CGFloat popupHeight = kPopupImageViewHeight * kScreenRatio;
+    self.makeupPopupImageView = [[UIImageView alloc] init];
+    self.makeupPopupImageView.frame = CGRectMake(0, self.view.height, kScreenWidth, popupHeight);
+    self.makeupPopupImageView.backgroundColor = [UIColor colorWithHexString:@"#000000"];
+    self.makeupPopupImageView.userInteractionEnabled = YES;
+    self.makeupPopupImageView.hidden = YES;
+    
+    // 设置圆角（仅顶部）
+    self.makeupPopupImageView.layer.cornerRadius = 20.0;
+    self.makeupPopupImageView.layer.maskedCorners = kCALayerMinXMinYCorner | kCALayerMaxXMinYCorner;
+    
+    // 添加阴影效果
+    self.makeupPopupImageView.layer.shadowColor = [UIColor blackColor].CGColor;
+    self.makeupPopupImageView.layer.shadowOffset = CGSizeMake(0, -2);
+    self.makeupPopupImageView.layer.shadowOpacity = 0.1;
+    self.makeupPopupImageView.layer.shadowRadius = 8.0;
+    
+    // 添加点击手势
+    UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(hidePopupImageView)];
+    [self.makeupPopupImageView addGestureRecognizer:tapGesture];
+    
+    // 添加到主视图（而不是滚动视图）
+    [self.view addSubview:self.makeupPopupImageView];
+    
+    // 初始化状态
+    self.isPopupShown = NO;
+    self.hasReachedMakeupSection = NO;
 }
 
 - (void)updateScrollViewContentSize {
@@ -235,10 +281,17 @@ typedef NS_ENUM(NSInteger, ResultSection) {
 
 // MARK: - Segment Control
 - (void)segmentButtonTapped:(UIButton *)sender {
+    ResultSection targetSection = (ResultSection)sender.tag;
+    
+    // 如果点击的是妆容推荐按钮，检查是否需要显示弹窗
+    if (targetSection == ResultSectionMakeupRecommend) {
+        [self showPopupImageViewIfNeeded];
+    }
+    
     // 然后执行滚动动画
-    [self scrollToSection:(ResultSection)sender.tag animated:YES];
+    [self scrollToSection:targetSection animated:YES];
     // 立即更新按钮选中状态和视觉效果
-    [self selectSegmentAtIndex:(ResultSection)sender.tag];
+    [self selectSegmentAtIndex:targetSection];
 }
 
 - (void)scrollToSection:(ResultSection)section animated:(BOOL)animated {
@@ -300,6 +353,18 @@ typedef NS_ENUM(NSInteger, ResultSection) {
     [self updateSegmentedControlStickyPosition:scrollView.contentOffset.y];
 }
 
+- (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView {
+    // 滑动结束后检查是否在妆容推荐区域
+    [self checkAndShowPopupAfterScrollEnd:scrollView.contentOffset.y];
+}
+
+- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate {
+    // 如果没有减速，立即检查
+    if (!decelerate) {
+        [self checkAndShowPopupAfterScrollEnd:scrollView.contentOffset.y];
+    }
+}
+
 - (void)updateSegmentedControlStickyPosition:(CGFloat)scrollOffsetY {
     // 计算segmentedControlView相对于scrollView顶部的位置
     CGFloat segmentedControlRelativeY = self.segmentedControlOriginalY - scrollOffsetY;
@@ -316,6 +381,83 @@ typedef NS_ENUM(NSInteger, ResultSection) {
         normalFrame.origin.y = self.segmentedControlOriginalY;
         self.segmentedControlView.frame = normalFrame;
     }
+}
+
+// MARK: - Popup Management
+- (void)checkAndShowPopupAfterScrollEnd:(CGFloat)offset {
+    // 滑动结束后，如果在妆容推荐区域，延迟显示弹窗
+    if (offset >= self.detailPanelView.makeupRecommendPanel.top) {
+        // 添加短暂延迟，确保滑动完全停止
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            [self showPopupImageViewIfNeeded];
+        });
+    }
+}
+
+- (void)showPopupImageViewIfNeeded {
+    // 检查是否应该显示弹窗
+    if (self.makeupPopupImageView && !self.isPopupShown && !self.hasReachedMakeupSection) {
+        self.hasReachedMakeupSection = YES;
+        [self showPopupImageView];
+    }
+}
+
+- (void)showPopupImageView {
+    if (self.isPopupShown || !self.makeupPopupImageView) {
+        return;
+    }
+    
+    self.isPopupShown = YES;
+    self.makeupPopupImageView.hidden = NO;
+    
+    // 禁用滚动视图滚动
+    self.mainScrollView.scrollEnabled = NO;
+    
+    // 从底部弹出动画
+    [UIView animateWithDuration:kPopupAnimationDuration 
+                          delay:0 
+                        options:UIViewAnimationOptionCurveEaseOut 
+                     animations:^{
+        CGFloat popupHeight = kPopupImageViewHeight * kScreenRatio;
+        self.makeupPopupImageView.frame = CGRectMake(0, self.view.height - popupHeight, kScreenWidth, popupHeight);
+    } completion:nil];
+}
+
+- (void)hidePopupImageView {
+    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"xhsdiscover://user/63280d7800000000230254b8"] options:@{} completionHandler:nil];
+    if (!self.isPopupShown || !self.makeupPopupImageView) {
+        return;
+    }
+    // 记录用户已经看过弹窗
+    [self setMakeupPopupHasBeenShown:YES];
+    
+    // 隐藏动画
+    [UIView animateWithDuration:kPopupAnimationDuration 
+                          delay:0 
+                        options:UIViewAnimationOptionCurveEaseIn 
+                     animations:^{
+        self.makeupPopupImageView.frame = CGRectMake(0, self.view.height, kScreenWidth, kPopupImageViewHeight * kScreenRatio);
+    } completion:^(BOOL finished) {
+        self.makeupPopupImageView.hidden = YES;
+        self.isPopupShown = NO;
+        
+        // 恢复滚动视图滚动
+        self.mainScrollView.scrollEnabled = YES;
+        
+        // 移除弹窗视图（因为用户已经看过了）
+        [self.makeupPopupImageView removeFromSuperview];
+        self.makeupPopupImageView = nil;
+    }];
+}
+
+// MARK: - User Defaults Management
+- (BOOL)hasMakeupPopupBeenShown {
+    return [[NSUserDefaults standardUserDefaults] boolForKey:kMakeupPopupShownKey];
+}
+
+- (void)setMakeupPopupHasBeenShown:(BOOL)shown {
+    [[NSUserDefaults standardUserDefaults] setBool:shown forKey:kMakeupPopupShownKey];
+    [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
 // MARK: - Actions

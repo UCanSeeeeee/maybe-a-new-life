@@ -2,8 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>用于保存生成的海报图片到相册</string>
 	<key>NSCameraUsageDescription</key>
 	<string>用于分析面部特征</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>用于保存生成的海报图片到相册</string>
 	<key>UIUserInterfaceStyle</key>
 	<string>Light</string>
 	<key>CFBundleURLTypes</key>
