@@ -49,7 +49,7 @@
     
     
     self.titleLabel = [UILabel new];
-    self.titleLabel.font = [UIFont systemFontOfSize:11];
+    self.titleLabel.font = [UIFont systemFontOfSize:FontSize(11)];
     self.titleLabel.text = @"风格定位";
     self.titleLabel.textColor = [UIColor colorWithHexString:@"#F08170"];
     [self.titleLabel sizeToFit];
@@ -65,7 +65,7 @@
     UILabel *summaryLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, self.viewsContainer.width - 32, 24)];
     [self.viewsContainer addSubview:summaryLabel];
     summaryLabel.text = self.dataModel.conclusionStyleString;
-    summaryLabel.font = [UIFont boldSystemFontOfSize:14];
+    summaryLabel.font = [UIFont boldSystemFontOfSize:FontSize(14)];
     summaryLabel.textColor = [UIColor blackColor];
     [summaryLabel sizeToFit];
     summaryLabel.top = self.titleLabel.bottom + 3;
@@ -95,7 +95,7 @@
     UILabel *shapeTitleLabel = [[UILabel alloc] init];
     [bgContainer addSubview:shapeTitleLabel];
     shapeTitleLabel.text = @"1. 重点修饰";
-    shapeTitleLabel.font = [UIFont systemFontOfSize:14 weight:UIFontWeightMedium];
+    shapeTitleLabel.font = [UIFont systemFontOfSize:FontSize(14) weight:UIFontWeightMedium];
     shapeTitleLabel.textColor = [UIColor colorWithHexString:@"#262626"];
     [shapeTitleLabel sizeToFit];
     shapeTitleLabel.top = starsCard.bottom + 16;
@@ -116,7 +116,7 @@
     UILabel *featuresTitleLabel = [[UILabel alloc] init];
     [bgContainer addSubview:featuresTitleLabel];
     featuresTitleLabel.text = @"2. 妆容思路";
-    featuresTitleLabel.font = [UIFont systemFontOfSize:14 weight:UIFontWeightMedium];
+    featuresTitleLabel.font = [UIFont systemFontOfSize:FontSize(14) weight:UIFontWeightMedium];
     featuresTitleLabel.textColor = [UIColor colorWithHexString:@"#262626"];
     [featuresTitleLabel sizeToFit];
     featuresTitleLabel.top = lastView.bottom + 16;

@@ -9,338 +9,322 @@
 #import "BaseFoundation.h"
 #import "PanelDSummary.h"
 
-@interface ResultDetailController () <UIGestureRecognizerDelegate>
+// MARK: - Constants
+static const CGFloat kBackButtonSize = 40.0;       // 返回按钮尺寸
+static const CGFloat kBackButtonMargin = 20.0;     // 返回按钮边距
+static const CGFloat kSectionButtonHeight = 40.0;  // 分段按钮高度
+static const CGFloat kContentTopMargin = 20.0;     // 内容顶部边距
+static const CGFloat kContentBottomMargin = 20.0;  // 内容底部边距
+static const CGFloat kSectionSpacing = 10.0;       // 区块间距
 
-@property (nonatomic, strong) UIView *panelContainer;        // 外部容器
-@property (nonatomic, strong) PanelDSummary *topView;
-@property (nonatomic, strong) InfoPanelView *panelContentView;
-@property (nonatomic, strong) UIPanGestureRecognizer *panGesture; // 滑动手势
-@property (nonatomic, assign) CGFloat panelTopLimit;    // 顶部限制
-@property (nonatomic, assign) CGFloat contentScrollY;   // 内容滚动位置
-@property (nonatomic, assign) CGFloat maxContentScroll; // 内容最大滚动距离
-@property (nonatomic, assign) BOOL isPanelAtTop;        // 面板是否在顶部
-@property (nonatomic, strong) UIView *buttonContainer;        // 按钮容器
-@property (nonatomic, strong) NSArray<UIButton *> *sectionButtons;  // 分段按钮数组
-@property (nonatomic, assign) NSInteger currentSectionIndex;  // 当前选中的段落索引
+// MARK: - Section Types
+typedef NS_ENUM(NSInteger, ResultSection) {
+    ResultSectionFaceAnalysis = 0,  // 面部分析
+    ResultSectionStyleGuide,        // 风格定位
+    ResultSectionMakeupRecommend    // 妆容推荐
+};
 
-// 拍照后的照片
-@property (nonatomic, strong) UIImageView *photoPreviewImageView;
+@interface ResultDetailController () <UIScrollViewDelegate>
+
+// MARK: - UI Components
+@property (nonatomic, strong) UIView *containerView;           // 主容器
+@property (nonatomic, strong) UIScrollView *mainScrollView;    // 主滚动视图
+@property (nonatomic, strong) UIView *scrollContentView;      // 滚动内容容器
+@property (nonatomic, strong) PanelDSummary *summaryView;     // 顶部摘要视图
+@property (nonatomic, strong) UIView *segmentedControlView;   // 分段控制器容器
+@property (nonatomic, strong) InfoPanelView *detailPanelView; // 详情面板视图
+
+// MARK: - Controls
+@property (nonatomic, strong) NSArray<UIButton *> *segmentButtons;  // 分段按钮数组
+@property (nonatomic, assign) ResultSection currentSection;         // 当前选中的段落
+@property (nonatomic, assign) CGFloat segmentedControlOriginalY;    // segmentedControlView的原始Y坐标
+
 @end
 
 @implementation ResultDetailController
 
+// MARK: - Lifecycle
 - (void)viewDidLoad {
     [super viewDidLoad];
-    // 初始化参数
-    self.panelTopLimit = 100;
-    self.contentScrollY = 0;
-    self.isPanelAtTop = NO;
-    
-    self.photoPreviewImageView = [[UIImageView alloc] initWithFrame:self.view.bounds];
-    self.photoPreviewImageView.image = [GlobalToolHandler fetchGlobalModel].userPhotoImage;
-    self.photoPreviewImageView.contentMode = UIViewContentModeScaleAspectFill;
-    self.photoPreviewImageView.backgroundColor = [UIColor clearColor];
-    [self.view addSubview:self.photoPreviewImageView];
-    
-    // 顶部左侧返回按钮
+    [self setupNavigationBar];
+    [self setupContainerView];
+    [self setupScrollView];
+    [self setupContentViews];
+}
+
+// MARK: - Setup Methods
+- (void)setupNavigationBar {
+    // 返回按钮
     UIButton *backButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    [backButton setImage:[UIImage imageNamed:@"photo_back_icon"] forState:UIControlStateNormal];
-    backButton.frame = CGRectMake(20, 50, 40, 40);
+    UIImage *backIcon = [UIImage imageNamed:@"photo_back_icon"];
+    // 将白色图片转换为黑色
+    UIImage *blackBackIcon = [backIcon imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+    [backButton setImage:blackBackIcon forState:UIControlStateNormal];
+    backButton.tintColor = [UIColor blackColor];
+    backButton.frame = CGRectMake(kBackButtonMargin, 0, kBackButtonSize, kBackButtonSize);
+    backButton.bottom = SafeAreaTopHeight + 40;
+    
     [backButton addTarget:self action:@selector(dismissViewController) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:backButton];
     
-    // 设置面板视图
-    [self setupPanelView];
+    // 标题文案
+    UILabel *titleLabel = [[UILabel alloc] init];
+    titleLabel.text = @"面部美学报告";
+    titleLabel.textColor = [UIColor colorWithHexString:@"#262626"];
+    titleLabel.font = [UIFont systemFontOfSize:FontSize(14)];
+    titleLabel.textAlignment = NSTextAlignmentCenter;
+    [titleLabel sizeToFit];
+    titleLabel.center = CGPointMake(self.view.width / 2, backButton.centerY);
+    [self.view addSubview:titleLabel];
     
-    // 设置内容视图
-    [self setupContentView];
-    
-    // 添加滑动手势
-    [self setupPanGesture];
+    // 分享按钮
+    UIButton *shareButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    UIImage *shareIcon = [UIImage imageNamed:@"CH_share_icon"];
+    // 调整图片大小为 15x15
+    UIImage *resizedShareIcon = [self resizeImage:shareIcon toSize:CGSizeMake(20, 20)];
+    [shareButton setImage:resizedShareIcon forState:UIControlStateNormal];
+    shareButton.frame = CGRectMake(self.view.width - kBackButtonMargin - kBackButtonSize, 0, kBackButtonSize, kBackButtonSize);
+    shareButton.centerY = backButton.centerY;
+    [shareButton addTarget:self action:@selector(shareButtonTapped) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:shareButton];
 }
 
-- (void)setupPanelView {
-    // 创建面板视图
+- (void)setupContainerView {
+    CGFloat containerHeight = self.view.height - (SafeAreaTopHeight + 45);
+    CGFloat containerY = SafeAreaTopHeight + 45;
     
-    self.panelContainer = [[UIView alloc] initWithFrame:CGRectMake(0, self.view.height * 0.9, self.view.bounds.size.width, self.view.height - self.panelTopLimit)];
-    self.panelContainer.backgroundColor = [UIColor whiteColor];
-    self.panelContainer.layer.cornerRadius = 16;
-    self.panelContainer.clipsToBounds = YES;
+    self.containerView = [[UIView alloc] initWithFrame:CGRectMake(0, containerY, self.view.width, containerHeight)];
+    self.containerView.backgroundColor = [UIColor whiteColor];
+    self.containerView.clipsToBounds = YES;
     
-    // 添加三色渐变背景
-    CAGradientLayer *gradient = [CAGradientLayer layer];
-    gradient.frame = self.panelContainer.bounds;
-    gradient.colors = @[(__bridge id)[UIColor colorWithRed:0.9 green:0.4 blue:0.4 alpha:0.2].CGColor,
-                        (__bridge id)[UIColor colorWithRed:0.4 green:0.9 blue:0.4 alpha:0.2].CGColor,
-                        (__bridge id)[UIColor colorWithRed:0.4 green:0.4 blue:0.9 alpha:0.2].CGColor];
-    gradient.startPoint = CGPointMake(0.0, 0.0);
-    gradient.endPoint = CGPointMake(1.0, 1.0);
-    [self.panelContainer.layer insertSublayer:gradient atIndex:0];
-    
-    [self.view addSubview:self.panelContainer];
+    [self.view addSubview:self.containerView];
 }
 
-- (void)setupContentView {
-    self.topView = [PanelDSummary new];
-    [self.panelContainer addSubview:self.topView];
-    [self.topView loadView];
-    self.topView.top = 20;
+- (void)setupScrollView {
+    self.mainScrollView = [[UIScrollView alloc] initWithFrame:self.containerView.bounds];
+    self.mainScrollView.delegate = self;
+    self.mainScrollView.showsVerticalScrollIndicator = YES;
+    self.mainScrollView.showsHorizontalScrollIndicator = NO;
+    [self.containerView addSubview:self.mainScrollView];
     
-    // 设置按钮组
-    [self setupSectionButtons];
-    
-    UIView *clipContainer = [[UIView alloc] init];
-    [self.panelContainer addSubview:clipContainer];
-    self.panelContentView = [InfoPanelView new];
-    [clipContainer addSubview:self.panelContentView];
-    [self.panelContentView loadView];
-    clipContainer.size = self.panelContentView.size;
-    clipContainer.top = self.buttonContainer.bottom + 10;
-    clipContainer.clipsToBounds = YES;
-    
-    self.maxContentScroll = self.panelContentView.bottom - self.panelContainer.bounds.size.height + clipContainer.top;
-    if (self.maxContentScroll < 0) {
-        self.maxContentScroll = 0;
-    }
+    // 创建滚动内容容器
+    self.scrollContentView = [[UIView alloc] init];
+    [self.mainScrollView addSubview:self.scrollContentView];
 }
 
-- (void)setupPanGesture {
-    // 添加滑动手势到内容视图
-    self.panGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePan:)];
-    self.panGesture.delegate = self;
-//    UIView *tempGes = [UIView new];
-    [self.panelContainer addGestureRecognizer:self.panGesture];
+- (void)setupContentViews {
+    [self setupSummaryView];
+    [self setupSegmentedControl];
+    [self setupDetailPanelView];
+    [self updateScrollViewContentSize];
 }
 
-#pragma mark - 手势处理
+- (void)setupSummaryView {
+    self.summaryView = [PanelDSummary new];
+    [self.scrollContentView addSubview:self.summaryView];
+    [self.summaryView loadView];
+    self.summaryView.top = kContentTopMargin;
+}
 
-- (void)handlePan:(UIPanGestureRecognizer *)gesture {
-    CGPoint translation = [gesture translationInView:self.view];
-    CGPoint velocity = [gesture velocityInView:self.view];
-    static CGFloat initialPanelY;
-    static CGFloat initialContentY;
+- (void)setupSegmentedControl {
+    self.segmentedControlView = [[UIView alloc] init];
+    [self.scrollContentView addSubview:self.segmentedControlView];
     
-    CGFloat positionBottom = self.view.bounds.size.height * 0.9;
-    CGFloat positionTop = self.panelTopLimit;
+    // 计算并保存原始Y坐标
+    self.segmentedControlOriginalY = self.summaryView.bottom + kSectionSpacing;
+    self.segmentedControlView.frame = CGRectMake(0, 
+                                                self.segmentedControlOriginalY, 
+                                                self.containerView.width, 
+                                                kSectionButtonHeight);
     
-    // 手势开始时记录初始位置
-    if (gesture.state == UIGestureRecognizerStateBegan) {
-        initialPanelY = self.panelContainer.frame.origin.y;
-        initialContentY = self.contentScrollY;
-        [gesture setTranslation:CGPointZero inView:self.view];
-        return;
-    }
+    // 设置背景色以便在吸顶时有清晰的视觉效果
+    self.segmentedControlView.backgroundColor = [UIColor whiteColor];
     
-    // 处理滑动中的状态
-    if (gesture.state == UIGestureRecognizerStateChanged) {
-        // 向下滑动为正，向上滑动为负
-        if (translation.y > 0) { // 向下滑动
-            if (self.contentScrollY > 0) {
-                // 如果内容已经滚动，先滚回顶部
-                self.contentScrollY = MAX(0, initialContentY - translation.y);
-                [self updateContentPosition];
-            } else if (initialPanelY <= positionTop) {
-                // 内容已经在顶部，且面板在顶部或以上位置，移动面板
-                CGFloat newY = MIN(positionBottom, initialPanelY + translation.y);
-                [self updatePanelPosition:newY];
-            }
-        } else { // 向上滑动
-            if (initialPanelY > positionTop) {
-                // 如果面板不在顶部，先将面板移到顶部
-                CGFloat newY = MAX(positionTop, initialPanelY + translation.y);
-                [self updatePanelPosition:newY];
-            } else if (self.contentScrollY < self.maxContentScroll) {
-                // 面板已经在顶部，滚动内容
-                self.contentScrollY = MIN(self.maxContentScroll, initialContentY - translation.y);
-                [self updateContentPosition];
-            }
-        }
-    }
+    NSArray<NSString *> *sectionTitles = @[@"面部分析", @"风格定位", @"妆容推荐"];
+    [self createSegmentButtonsWithTitles:sectionTitles];
+    // 确保在所有装饰视图添加完成后再设置初始选中状态
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self selectSegmentAtIndex:ResultSectionFaceAnalysis];
+    });
+}
+
+- (void)setupDetailPanelView {
+    self.detailPanelView = [InfoPanelView new];
+    [self.scrollContentView addSubview:self.detailPanelView];
+    [self.scrollContentView bringSubviewToFront:self.segmentedControlView];
+    [self.detailPanelView loadView];
+    self.detailPanelView.top = self.segmentedControlView.bottom + kSectionSpacing;
+}
+
+- (void)updateScrollViewContentSize {
+    CGFloat contentHeight = self.detailPanelView.bottom + kContentBottomMargin;
+    self.scrollContentView.frame = CGRectMake(0, 0, self.containerView.width, contentHeight);
+    self.mainScrollView.contentSize = CGSizeMake(self.containerView.width, contentHeight);
+}
+
+// MARK: - UI Helpers
+- (UIImage *)resizeImage:(UIImage *)image toSize:(CGSize)newSize {
+    UIGraphicsBeginImageContextWithOptions(newSize, NO, 0.0);
+    [image drawInRect:CGRectMake(0, 0, newSize.width, newSize.height)];
+    UIImage *resizedImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    return resizedImage;
+}
+
+- (void)addDecorationViewsToButton:(UIButton *)button isLastButton:(BOOL)isLastButton {
+    // 背景图 - 70*27pt，每个按钮都有，但只在选中时显示
+    UIImageView *backgroundImageView = [[UIImageView alloc] init];
+    backgroundImageView.image = [UIImage imageNamed:@"detail_button_bg"];
+    backgroundImageView.frame = CGRectMake(0, 0, 70, 27);
+    backgroundImageView.centerX = button.bounds.size.width / 2;
+    backgroundImageView.bottom = button.bounds.size.height;
+    backgroundImageView.tag = 1001; // 设置tag用于查找
+    backgroundImageView.hidden = YES; // 初始隐藏，后续通过selectSegmentAtIndex控制显示
+    [button insertSubview:backgroundImageView atIndex:0]; // 插入到最底层
     
-    // 处理手势结束状态
-    if (gesture.state == UIGestureRecognizerStateEnded ||
-        gesture.state == UIGestureRecognizerStateCancelled) {
+    // 右侧图标 - 28*14pt，只有最后一个按钮才有，一直显示
+    if (isLastButton) {
+        UIImageView *hotIconImageView = [[UIImageView alloc] init];
+        hotIconImageView.image = [UIImage imageNamed:@"detail_button_hot"];
+        hotIconImageView.frame = CGRectMake(0, 0, 28, 14);
+        hotIconImageView.tag = 1002; // 设置tag用于查找
         
-        // 计算面板最终位置
-        if (self.panelContainer.frame.origin.y > positionTop) {
-            CGFloat finalY;
-            
-            // 根据速度和位置决定最终位置
-            if (fabs(velocity.y) > 500) {
-                finalY = velocity.y > 0 ? positionBottom : positionTop;
-            } else {
-                CGFloat midPoint = (positionTop + positionBottom) / 2;
-                finalY = self.panelContainer.frame.origin.y < midPoint ? positionTop : positionBottom;
-            }
-            
-            // 更新面板状态
-            self.isPanelAtTop = (finalY == positionTop);
-            
-            // 动画到最终位置
-            [UIView animateWithDuration:0.3 animations:^{
-                [self updatePanelPosition:finalY];
-            }];
-        }
-        // 处理内容的惯性滚动
-        else if (self.contentScrollY >= 0 && self.contentScrollY <= self.maxContentScroll) {
-            // 计算内容的惯性滚动
-            CGFloat finalContentY = self.contentScrollY;
-            
-            // 根据速度计算惯性滚动
-            if (fabs(velocity.y) > 100) {
-                // 速度转换为滚动距离 (大致模拟)
-                CGFloat momentum = velocity.y * -0.3; // 反向，因为向上滑动时velocity为负
-                finalContentY = self.contentScrollY + momentum;
-                
-                // 限制范围
-                finalContentY = MAX(0, MIN(self.maxContentScroll, finalContentY));
-            }
-            
-            // 动画到最终位置
-            [UIView animateWithDuration:0.3 animations:^{
-                self.contentScrollY = finalContentY;
-                [self updateContentPosition];
-            }];
-        }
+        // 计算按钮文字的尺寸和位置，让图标紧贴文字右侧
+        CGSize textSize = [button.titleLabel.text sizeWithAttributes:@{NSFontAttributeName: button.titleLabel.font}];
+        CGFloat textCenterX = button.bounds.size.width / 2;
+        CGFloat textRightEdge = textCenterX + textSize.width / 2;
+        
+        // 图标紧贴文字右侧，添加2pt间距
+        hotIconImageView.left = textRightEdge + 2;
+        hotIconImageView.centerY = button.bounds.size.height / 2;
+        // 右侧图标一直显示，不受选中状态影响
+        [button addSubview:hotIconImageView];
     }
 }
 
-#pragma mark - 位置更新
-- (void)updatePanelPosition:(CGFloat)yPosition {
-    CGRect frame = self.panelContainer.frame;
-    frame.origin.y = yPosition;
-    self.panelContainer.frame = frame;
-    
-    // 更新面板位置状态
-    self.isPanelAtTop = (yPosition == self.panelTopLimit);
-}
-
-- (void)updateContentPosition {
-    // 更新内容子视图的位置
-    if (self.panelContainer.subviews.count > 0) {
-        UIView *contentContainer = self.panelContentView;
-        CGRect frame = contentContainer.frame;
-        frame.origin.y = -self.contentScrollY;
-        contentContainer.frame = frame;
-        // 更新按钮状态
-       [self updateSectionButtonsForOffset:self.contentScrollY];
-    }
-}
-
-#pragma mark - UIGestureRecognizerDelegate
-
-- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
-    // 允许同时识别
-    return YES;
-}
-
-#pragma mark - 控制板块
-- (void)updateSectionButtonsForOffset:(CGFloat)offset {
-    // 根据偏移量判断当前显示的是哪个部分
-    NSInteger targetSection = 0;
-    
-    if (offset >= self.panelContentView.makeupView.top) {
-        targetSection = 2;
-    } else if (offset >= self.panelContentView.styleView.top) {
-        targetSection = 1;
-    }
-    
-    if (targetSection != self.currentSectionIndex) {
-        [self updateSelectedButton:targetSection];
-    }
-}
-
-- (void)setupSectionButtons {
-    // 创建按钮容器
-    self.buttonContainer = [[UIView alloc] init];
-    [self.panelContainer addSubview:self.buttonContainer];
-    self.buttonContainer.frame = CGRectMake(0, self.topView.bottom + 10, self.view.width, 40);
-    
-    // 创建三个按钮
-    NSArray *titles = @[@"面部分析", @"风格定位", @"妆容推荐"];
+- (void)createSegmentButtonsWithTitles:(NSArray<NSString *> *)titles {
     NSMutableArray *buttons = [NSMutableArray array];
-    CGFloat buttonWidth = self.view.width / 3;
+    CGFloat buttonWidth = self.containerView.width / titles.count;
     
     for (NSInteger i = 0; i < titles.count; i++) {
-        UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
-        button.frame = CGRectMake(buttonWidth * i, 0, buttonWidth, 40);
-        [button setTitle:titles[i] forState:UIControlStateNormal];
-        button.titleLabel.font = [UIFont systemFontOfSize:14 weight:UIFontWeightMedium];
-        [button setTitleColor:[UIColor colorWithHexString:@"#777777"] forState:UIControlStateNormal];
-        [button setTitleColor:[UIColor colorWithHexString:@"#262626"] forState:UIControlStateSelected];
-        button.tag = i;
-        [button addTarget:self action:@selector(sectionButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
-        [self.buttonContainer addSubview:button];
+        UIButton *button = [self createSegmentButtonWithTitle:titles[i] 
+                                                        frame:CGRectMake(buttonWidth * i, 0, buttonWidth, kSectionButtonHeight)
+                                                          tag:i];
+        [self.segmentedControlView addSubview:button];
         [buttons addObject:button];
+        
+        // 为每个按钮添加装饰视图
+        [self addDecorationViewsToButton:button isLastButton:(i == titles.count - 1)];
     }
     
-    self.sectionButtons = buttons;
-    // 默认选中第一个按钮
-    [self updateSelectedButton:0];
+    self.segmentButtons = [buttons copy];
 }
 
-- (void)sectionButtonTapped:(UIButton *)sender {
-    [self scrollToSection:sender.tag animated:YES];
+- (UIButton *)createSegmentButtonWithTitle:(NSString *)title frame:(CGRect)frame tag:(NSInteger)tag {
+    UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+    button.frame = frame;
+    button.tag = tag;
+    [button setTitle:title forState:UIControlStateNormal];
+    button.titleLabel.font = [UIFont systemFontOfSize:FontSize(14) weight:UIFontWeightMedium];
+    [button setTitleColor:[UIColor colorWithHexString:@"#777777"] forState:UIControlStateNormal];
+    [button setTitleColor:[UIColor colorWithHexString:@"#262626"] forState:UIControlStateSelected];
+    [button addTarget:self action:@selector(segmentButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
+    return button;
 }
 
-- (void)scrollToSection:(NSInteger)sectionIndex animated:(BOOL)animated {
-    // 更新按钮状态
-    [self updateSelectedButton:sectionIndex];
-    
-    // 计算目标偏移量
-    CGFloat targetOffset = 0;
-    switch (sectionIndex) {
-        case 0: // 面部分析
-            targetOffset = 0;
-            break;
-        case 1: // 风格定位
-            targetOffset = self.panelContentView.styleView.top;
-            break;
-        case 2: // 妆容推荐
-            targetOffset = self.panelContentView.makeupView.top;
-            break;
+// MARK: - Segment Control
+- (void)segmentButtonTapped:(UIButton *)sender {
+    // 然后执行滚动动画
+    [self scrollToSection:(ResultSection)sender.tag animated:YES];
+    // 立即更新按钮选中状态和视觉效果
+    [self selectSegmentAtIndex:(ResultSection)sender.tag];
+}
+
+- (void)scrollToSection:(ResultSection)section animated:(BOOL)animated {
+    // 如果当前section已经是目标section，不需要重复选中
+    if (self.currentSection != section) {
+        [self selectSegmentAtIndex:section];
     }
     
-    // 确保不超过最大滚动距离
-    targetOffset = MIN(targetOffset, self.maxContentScroll);
+    CGFloat targetOffset = [self offsetForSection:section];
+    CGFloat maxOffset = MAX(0, self.mainScrollView.contentSize.height - self.mainScrollView.frame.size.height);
+    targetOffset = MIN(targetOffset, maxOffset);
     targetOffset = MAX(0, targetOffset);
     
-    // 执行滚动动画
-    if (animated) {
-        [UIView animateWithDuration:0.3 animations:^{
-            self.contentScrollY = targetOffset;
-            [self updateContentPosition];
-        }];
-    } else {
-        self.contentScrollY = targetOffset;
-        [self updateContentPosition];
+    [self.mainScrollView setContentOffset:CGPointMake(0, targetOffset + 1) animated:animated];
+}
+
+- (CGFloat)offsetForSection:(ResultSection)section {
+    switch (section) {
+        case ResultSectionFaceAnalysis:
+            return 0;
+        case ResultSectionStyleGuide:
+            return self.detailPanelView.styleView.top;
+        case ResultSectionMakeupRecommend:
+            return self.detailPanelView.makeupView.top;
     }
 }
 
-- (void)updateSelectedButton:(NSInteger)selectedIndex {
-    self.currentSectionIndex = selectedIndex;
-    [self.sectionButtons enumerateObjectsUsingBlock:^(UIButton *button, NSUInteger idx, BOOL *stop) {
-        button.selected = (idx == selectedIndex);
-        // 可以添加更多选中状态的样式
-        button.backgroundColor = (idx == selectedIndex) ? [UIColor colorWithWhite:0.9 alpha:1.0] : [UIColor clearColor];
+- (void)selectSegmentAtIndex:(ResultSection)section {
+    self.currentSection = section;
+    [self.segmentButtons enumerateObjectsUsingBlock:^(UIButton *button, NSUInteger idx, BOOL *stop) {
+        BOOL isSelected = (idx == section);
+        button.selected = isSelected;
+        
+        // 更新背景图显示状态
+        UIImageView *backgroundImageView = [button viewWithTag:1001];
+        if (backgroundImageView) {
+            backgroundImageView.hidden = !isSelected;
+        }
     }];
 }
 
-#pragma mark - 外部接口
-
-- (void)switchValueChanged:(UISwitch *)sender {
-    CGFloat targetPosition = sender.isOn ? self.panelTopLimit : self.view.bounds.size.height * 0.9;
+- (void)updateSegmentSelectionForScrollOffset:(CGFloat)offset {
+    ResultSection targetSection = ResultSectionFaceAnalysis;
     
-    // 更新面板位置状态
-    self.isPanelAtTop = sender.isOn;
+    if (offset >= self.detailPanelView.makeupView.top) {
+        targetSection = ResultSectionMakeupRecommend;
+    } else if (offset >= self.detailPanelView.styleView.top) {
+        targetSection = ResultSectionStyleGuide;
+    }
     
-    [UIView animateWithDuration:0.3 animations:^{
-        [self updatePanelPosition:targetPosition];
-    }];
+    if (targetSection != self.currentSection) {
+        [self selectSegmentAtIndex:targetSection];
+    }
 }
 
+// MARK: - UIScrollViewDelegate
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView {
+    [self updateSegmentSelectionForScrollOffset:scrollView.contentOffset.y];
+    [self updateSegmentedControlStickyPosition:scrollView.contentOffset.y];
+}
+
+- (void)updateSegmentedControlStickyPosition:(CGFloat)scrollOffsetY {
+    // 计算segmentedControlView相对于scrollView顶部的位置
+    CGFloat segmentedControlRelativeY = self.segmentedControlOriginalY - scrollOffsetY;
+    
+    // 如果segmentedControlView即将滚出顶部，则让它吸附在顶部
+    if (segmentedControlRelativeY <= 0) {
+        // 吸顶状态：固定在scrollView的顶部
+        CGRect stickyFrame = self.segmentedControlView.frame;
+        stickyFrame.origin.y = scrollOffsetY;
+        self.segmentedControlView.frame = stickyFrame;
+    } else {
+        // 正常状态：保持原始位置
+        CGRect normalFrame = self.segmentedControlView.frame;
+        normalFrame.origin.y = self.segmentedControlOriginalY;
+        self.segmentedControlView.frame = normalFrame;
+    }
+}
+
+// MARK: - Actions
 - (void)dismissViewController {
     [self.navigationController popViewControllerAnimated:YES];
+}
+
+- (void)shareButtonTapped {
+    // TODO: 实现分享功能
+    NSLog(@"分享按钮被点击");
 }
 
 @end

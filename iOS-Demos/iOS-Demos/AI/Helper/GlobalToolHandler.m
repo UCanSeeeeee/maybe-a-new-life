@@ -24,6 +24,13 @@
 
 @implementation GlobalToolHandler
 
+- (GlobalModel *)globalModel {
+    if (!_globalModel) {
+        _globalModel = [GlobalModel new];
+    }
+    return _globalModel;
+}
+
 + (instancetype)sharedInstance {
     static GlobalToolHandler *sharedInstance = nil;
     static dispatch_once_t onceToken;
@@ -83,6 +90,65 @@
     return [GlobalToolHandler sharedInstance].globalModel;
 }
 
++ (NSString *)formatFaceAnalysisFromJSONString {
+    NSString *jsonString = [GlobalToolHandler sharedInstance].rawFaceString;
+    if (!jsonString || jsonString.length == 0) return @"";
+    NSData *data = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
+    NSError *error = nil;
+    NSDictionary *jsonDict = [NSJSONSerialization JSONObjectWithData:data options:0 error:&error];
+    if (error || !jsonDict) {
+        return @"JSON 解析失败";
+    }
+    
+    NSMutableString *result = [NSMutableString string];
+    
+    // ===== 中下庭比例 =====
+    NSDictionary *threeParts = jsonDict[@"three_parts"];
+    if (threeParts) {
+        NSDictionary *twoPart = threeParts[@"two_part"];
+        NSDictionary *threePart = threeParts[@"three_part"];
+        [result appendFormat:@"中下庭比例-中庭长度：%.2fcm、下庭长度：%.2fcm；\n",
+         [twoPart[@"facemid_length"] floatValue] / 10.0,
+         [threePart[@"facedown_length"] floatValue] / 10.0];
+    }
+    
+    // ===== 五眼比例 =====
+    NSDictionary *fiveEyes = jsonDict[@"five_eyes"];
+    if (fiveEyes) {
+        [result appendFormat:@"五眼比例-外眼角颧弓留白：%.2fcm、眼睛宽度：%.2fcm、内眼角间距：%.2fcm；\n",
+         [fiveEyes[@"one_eye"][@"righteye_empty_length"] floatValue] / 10.0,
+         [fiveEyes[@"righteye"] floatValue] / 10.0,
+         [fiveEyes[@"three_eye"][@"eyein_length"] floatValue] / 10.0];
+    }
+    
+    // ===== 脸型 =====
+    NSDictionary *face = jsonDict[@"face"];
+    if (face) {
+        CGFloat zygomaWidth = [face[@"zygoma_length"] floatValue] / 10.0;
+        CGFloat mandibleWidth = [face[@"mandible_length"] floatValue] / 10.0;
+        [result appendFormat:@"脸型-颧弓下颌角比：%.2f/1、颧弓宽度：%.2fcm、下颌角宽度：%.2fcm；\n",
+         zygomaWidth / mandibleWidth, zygomaWidth, mandibleWidth];
+    }
+    
+    // ===== 眼睛 =====
+    NSDictionary *eyes = jsonDict[@"eyes"];
+    if (eyes) {
+        [result appendFormat:@"眼睛宽度：%.2fcm、眼睛高度：%.2fcm；\n",
+         [eyes[@"eye_width"] floatValue] / 10.0,
+         [eyes[@"eye_height"] floatValue] / 10.0];
+    }
+    
+    // ===== 下巴 =====
+    NSDictionary *jaw = jsonDict[@"jaw"];
+    if (jaw) {
+        [result appendFormat:@"下巴长度：%.2fcm、下颌角宽度：%.2fcm......",
+         [jaw[@"jaw_length"] floatValue] / 10.0,
+         [jaw[@"jaw_width"] floatValue] / 10.0];
+    }
+    
+    return result;
+}
+
 + (void)requestWithImage:(UIImage *)image andCompletion:(void (^)(BOOL))completion {
     NSData *imageData = UIImageJPEGRepresentation(image, 0.8); // 或 PNG
     NSString *base64String = [imageData base64EncodedStringWithOptions:0];
@@ -130,7 +196,6 @@
     // 3. 设置请求头
     [manager.requestSerializer setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
     [manager.requestSerializer setValue:@"Bearer sk-29cf64d255434a8a8f142f4c1522898f" forHTTPHeaderField:@"Authorization"]; // 替换成你的 DeepSeek API Key
-
     // 4. 构造请求参数
     NSString *systemPrompt = @"请与黄金比例脸对比，做出6个判断，并请按照以下json格式回复，其中skinAge为int类型，代表肌肤年龄，值在“18、20、24、28、30、32、35、40”中取一个，similarStar为string类型，表示面容相似的明星，两人；recommendMakeup为string类型，表示妆容风格，参考\"XXX感，适合XX风格的妆容\"给出十字内描述；faceStyle是int类型，从“标准脸/长形脸/圆形脸/方形脸/梨形脸/瓜子脸/菱形脸”里选一个，分别对应0～6；suggestion为string类型，是面部润色建议，以\"你的脸型\"为开头，结合faceStyle的内容，回复60个字以内；animateStyle为int类型，表示动物系长相，用0～7对应“兔系、犬系、鹿系、猫系、猪系、蛇系、狐系、鸟系”;animateDetail是所对应动物系长相的30字以内的说明：\n{\n  \"skinAge\": int,\n  \"similarStar\": string,\n  \"recommendMakeup\": string,\n  \"suggestion\": string,\n  \"faceStyle\": int,\n  \"animateStyle\": int,\n  \"animateDetail\": string\n}";
     
@@ -271,4 +336,18 @@
     NSData *imageData = [[NSData alloc] initWithBase64EncodedString:base64String options:0];
     return [UIImage imageWithData:imageData];
 }
+
++ (NSString *)formatAnimateDetailText:(NSString *)originalText {
+    if (!originalText || originalText.length == 0) {
+        return originalText;
+    }
+    
+    // 简单替换：逗号和句号替换为换行符
+    NSString *formattedText = [originalText stringByReplacingOccurrencesOfString:@"，" withString:@"\n"];
+    formattedText = [formattedText stringByReplacingOccurrencesOfString:@"。" withString:@"\n"];
+    
+    // 去除首尾空白和换行符
+    return [formattedText stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+}
+
 @end

@@ -25,6 +25,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (void)updateModelWithDic:(NSDictionary *)rawDic andHandler:(void (^)(void))completionHandler;
 
++ (NSString *)formatFaceAnalysisFromJSONString;
+
 + (void)requestWithImage:(UIImage *)image andCompletion:(void (^)(BOOL isSuccess))completion;
 
 + (void)requestDeepSeekConclusion:(void (^)(BOOL isSuccess))completion;
@@ -49,6 +51,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (NSString *)jsonStringFromImage:(UIImage *)image;
 + (UIImage *)imageFromJsonString:(NSString *)jsonString;
+
+/// 格式化动物系描述文本，将逗号和句号替换为换行符
++ (NSString *)formatAnimateDetailText:(NSString *)originalText;
 @end
 
 NS_ASSUME_NONNULL_END

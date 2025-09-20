@@ -46,14 +46,14 @@
     self.titleLabel = [[UILabel alloc] init];
     [self addSubview:self.titleLabel];
     self.titleLabel.text = @"参考明星";
-    self.titleLabel.font = [UIFont systemFontOfSize:9 weight:UIFontWeightRegular];
+    self.titleLabel.font = [UIFont systemFontOfSize:FontSize(9) weight:UIFontWeightRegular];
     self.titleLabel.textColor = [UIColor colorWithHexString:@"#333333"];
     self.titleLabel.textAlignment = NSTextAlignmentCenter;
     [self.titleLabel sizeToFit];
     
     self.celebrityLabel = [[UILabel alloc] init];
     [self addSubview:self.celebrityLabel];
-    self.celebrityLabel.font = [UIFont systemFontOfSize:13 weight:UIFontWeightMedium];
+    self.celebrityLabel.font = [UIFont systemFontOfSize:FontSize(13) weight:UIFontWeightMedium];
     self.celebrityLabel.textColor = [UIColor colorWithHexString:@"#262626"];
     self.celebrityLabel.textAlignment = NSTextAlignmentCenter;
 }
@@ -85,7 +85,7 @@
         for (int i = 0; i < makeupStyles.count; i++) {
             UILabel *label = [[UILabel alloc] init];
             label.text = makeupStyles[i];
-            label.font = [UIFont systemFontOfSize:13 weight:UIFontWeightMedium];
+            label.font = [UIFont systemFontOfSize:FontSize(13) weight:UIFontWeightMedium];
             label.textColor = [UIColor colorWithHexString:@"#262626"];
             label.textAlignment = NSTextAlignmentCenter;
             label.backgroundColor = UIColor.clearColor;
@@ -101,7 +101,7 @@
         for (int i = 0; i < makeupStyles.count; i++) {
             UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(x, 0, labelWidth, labelHeight)];
             label.text = makeupStyles[i];
-            label.font = [UIFont systemFontOfSize:13 weight:UIFontWeightMedium];
+            label.font = [UIFont systemFontOfSize:FontSize(13) weight:UIFontWeightMedium];
             label.textColor = [UIColor colorWithHexString:@"#262626"];
             label.textAlignment = NSTextAlignmentCenter;
             label.backgroundColor = UIColor.clearColor;

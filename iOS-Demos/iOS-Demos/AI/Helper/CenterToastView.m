@@ -78,7 +78,7 @@
         _label = [[UILabel alloc] initWithFrame:self.bounds];
         _label.textColor = [UIColor whiteColor];
         _label.textAlignment = NSTextAlignmentCenter;
-        _label.font = [UIFont systemFontOfSize:16];
+        _label.font = [UIFont systemFontOfSize:FontSize(16)];
         _label.numberOfLines = 1;
         _label.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     }

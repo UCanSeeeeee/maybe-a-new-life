@@ -45,7 +45,7 @@
     UILabel *titleLabel = [UILabel new];
     [self addSubview:titleLabel];
     titleLabel.text = title;
-    titleLabel.font = [UIFont boldSystemFontOfSize:13];
+    titleLabel.font = [UIFont boldSystemFontOfSize:FontSize(13)];
     titleLabel.textColor = [UIColor colorWithHexString:@"#262626"];
     [titleLabel sizeToFit];
     titleLabel.left = icon.right + 6;
@@ -55,7 +55,7 @@
     UILabel *subtitleLabel = [UILabel new];
     [self addSubview:subtitleLabel];
     subtitleLabel.numberOfLines = 2;
-    subtitleLabel.font = [UIFont systemFontOfSize:12];
+    subtitleLabel.font = [UIFont systemFontOfSize:FontSize(12)];
     subtitleLabel.textColor = [UIColor colorWithHexString:@"#262626"];
     subtitleLabel.width = self.width - 18;
 

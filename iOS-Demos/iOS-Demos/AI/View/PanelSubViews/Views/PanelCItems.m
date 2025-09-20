@@ -30,7 +30,7 @@
 - (void)loadViewWithTitle:(NSString *)title imageStr:(NSString *)imageStr values:(NSArray *)values {
     self.titleLabel = [[UILabel alloc] init];
     [self addSubview:self.titleLabel];
-    self.titleLabel.font = [UIFont systemFontOfSize:14 weight:UIFontWeightMedium];
+    self.titleLabel.font = [UIFont systemFontOfSize:FontSize(14) weight:UIFontWeightMedium];
     self.titleLabel.text = title;
     self.titleLabel.textColor = [UIColor colorWithHexString:@"#262626"];
 
@@ -50,15 +50,29 @@
     for (NSString *text in values) {
         UILabel *label = [[UILabel alloc] init];
         [self addSubview:label];
-        label.text = text;
-        label.textColor = [UIColor grayColor];
-        label.font = [UIFont systemFontOfSize:13];
         label.numberOfLines = 0;
         label.width = 285;
         label.textAlignment = NSTextAlignmentLeft;
-        [label sizeToFit];
         label.left = self.imageView.left - 1;
         label.top = labelY;
+        
+        // 设置文本和行间距
+        if (text && text.length > 0) {
+            NSMutableAttributedString *attributedText = [[NSMutableAttributedString alloc] initWithString:text];
+            NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
+            paragraphStyle.lineSpacing = LineSpacing(3);
+            paragraphStyle.alignment = NSTextAlignmentLeft;
+            [attributedText addAttribute:NSParagraphStyleAttributeName value:paragraphStyle range:NSMakeRange(0, text.length)];
+            [attributedText addAttribute:NSFontAttributeName value:[UIFont systemFontOfSize:FontSize(13)] range:NSMakeRange(0, text.length)];
+            [attributedText addAttribute:NSForegroundColorAttributeName value:[UIColor grayColor] range:NSMakeRange(0, text.length)];
+            label.attributedText = attributedText;
+        } else {
+            label.text = text;
+            label.textColor = [UIColor grayColor];
+            label.font = [UIFont systemFontOfSize:FontSize(13)];
+        }
+        
+        [label sizeToFit];
         labelY += (label.height + 8);
     }
     self.height = labelY + 8;

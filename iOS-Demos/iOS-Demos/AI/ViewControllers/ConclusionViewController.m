@@ -135,15 +135,22 @@
 - (UILabel *)describeLabel {
     if (!_describeLabel) {
         _describeLabel = [[UILabel alloc] init];
-        _describeLabel.text = _dataModel.animateDetail;
-        _describeLabel.font = [UIFont systemFontOfSize:12];
-        _describeLabel.textColor = [UIColor colorWithHexString:@"#262626"];
-        _describeLabel.numberOfLines = 3;
+        NSString *text = [GlobalToolHandler formatAnimateDetailText:_dataModel.animateDetail];
+        NSMutableAttributedString *attributedText = [[NSMutableAttributedString alloc] initWithString:text];
+        NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
+        paragraphStyle.lineSpacing = LineSpacing(4);
+        paragraphStyle.alignment = NSTextAlignmentRight;
+        [attributedText addAttribute:NSParagraphStyleAttributeName value:paragraphStyle range:NSMakeRange(0, text.length)];
+        [attributedText addAttribute:NSFontAttributeName value:[UIFont systemFontOfSize:FontSize(12)] range:NSMakeRange(0, text.length)];
+        [attributedText addAttribute:NSForegroundColorAttributeName value:[UIColor colorWithHexString:@"#262626"] range:NSMakeRange(0, text.length)];
+        
+        _describeLabel.attributedText = attributedText;
+        _describeLabel.numberOfLines = 5;
         _describeLabel.textAlignment = NSTextAlignmentRight;
-        _describeLabel.width = 140;
+        _describeLabel.width = (kScreenWidth - 2 * 25) / 2.0;
         [_describeLabel sizeToFit];
-        _describeLabel.right = _animateImage.width - 25;
-        _describeLabel.top = _animateImage.bottom - 82 - 57;
+        _describeLabel.right = self.animateImage.width - 25;
+        _describeLabel.bottom = self.ageImage.top - 36;
     }
     return _describeLabel;
 }
@@ -154,8 +161,8 @@
         _ageImage = [[UIImageView alloc] initWithImage:tempImage];
         _ageImage.contentMode = UIViewContentModeScaleAspectFill;
         _ageImage.size = CGSizeMake(35 * tempImage.size.width / tempImage.size.height, 35);
-        _ageImage.right = _animateImage.width - 25;
-        _ageImage.bottom = _animateImage.bottom - 25;
+        _ageImage.right = self.animateImage.width - 25;
+        _ageImage.bottom = self.animateImage.bottom - 25;
     }
     return _ageImage;
 }
@@ -175,7 +182,7 @@
         leftTitleLabel.left = 58.5;
         leftTitleLabel.top = 47.5;
         UIView *leftUnderline = [[UIView alloc] init];
-        leftUnderline.backgroundColor = [UIColor colorWithHexString:@"#FFA3EF"];
+        leftUnderline.backgroundColor = [UIColor colorWithHexString:@"#FFE3FA"];
         leftUnderline.width = leftTitleLabel.width + 2;
         leftUnderline.height = 10;
         leftUnderline.left = leftTitleLabel.left;
@@ -187,7 +194,7 @@
         UILabel *leftValueLabel = [[UILabel alloc] init];
         [_bottomBG addSubview:leftValueLabel];
         leftValueLabel.text = _dataModel.similarStar;
-        leftValueLabel.font = [UIFont systemFontOfSize:12];
+        leftValueLabel.font = [UIFont systemFontOfSize:FontSize(12)];
         leftValueLabel.textColor = [UIColor grayColor];
         [leftValueLabel sizeToFit];
         leftValueLabel.left = leftTitleLabel.left;
@@ -203,7 +210,7 @@
         rightTitleLabel.top = leftTitleLabel.top;
         
         UIView *rightUnderline = [[UIView alloc] init];
-        rightUnderline.backgroundColor = [UIColor colorWithHexString:@"#FFA3EF"];
+        rightUnderline.backgroundColor = [UIColor colorWithHexString:@"#FFE3FA"];
         rightUnderline.width = rightTitleLabel.width + 2;
         rightUnderline.height = 10;
         rightUnderline.bottom = rightTitleLabel.bottom;
@@ -216,7 +223,7 @@
         UILabel *rightValueLabel = [[UILabel alloc] init];
         [_bottomBG addSubview:rightValueLabel];
         rightValueLabel.text = _dataModel.recommendMakeup;
-        rightValueLabel.font = [UIFont systemFontOfSize:12];
+        rightValueLabel.font = [UIFont systemFontOfSize:FontSize(12)];
         rightValueLabel.textColor = [UIColor grayColor];
         [rightValueLabel sizeToFit];
         rightValueLabel.left = rightTitleLabel.left;
@@ -225,11 +232,19 @@
         // ==== 描述文本 ====
         UILabel *descriptionLabel = [[UILabel alloc] init];
         [_bottomBG addSubview:descriptionLabel];
-        descriptionLabel.text = _dataModel.suggestion;
-        descriptionLabel.font = [UIFont systemFontOfSize:12];
-        descriptionLabel.textColor = [UIColor blackColor];
+        
+        NSString *suggestionText = _dataModel.suggestion;
+        NSMutableAttributedString *suggestionAttributedText = [[NSMutableAttributedString alloc] initWithString:suggestionText];
+        NSMutableParagraphStyle *suggestionParagraphStyle = [[NSMutableParagraphStyle alloc] init];
+        suggestionParagraphStyle.lineSpacing = LineSpacing(9);
+        suggestionParagraphStyle.alignment = NSTextAlignmentLeft;
+        [suggestionAttributedText addAttribute:NSParagraphStyleAttributeName value:suggestionParagraphStyle range:NSMakeRange(0, suggestionText.length)];
+        [suggestionAttributedText addAttribute:NSFontAttributeName value:[UIFont systemFontOfSize:FontSize(12)] range:NSMakeRange(0, suggestionText.length)];
+        [suggestionAttributedText addAttribute:NSForegroundColorAttributeName value:[UIColor blackColor] range:NSMakeRange(0, suggestionText.length)];
+        
+        descriptionLabel.attributedText = suggestionAttributedText;
         descriptionLabel.numberOfLines = 4;
-        descriptionLabel.width = 263;
+        descriptionLabel.width = self.bottomBG.width - 2 * leftTitleLabel.left;
         [descriptionLabel sizeToFit];
         descriptionLabel.left = leftTitleLabel.left;
         descriptionLabel.top = leftTitleLabel.bottom + 36;
@@ -248,7 +263,7 @@
 
         [_saveShareButton setTitle:@"关注我们" forState:UIControlStateNormal];
         [_saveShareButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-        _saveShareButton.titleLabel.font = [UIFont systemFontOfSize:14 weight:UIFontWeightMedium];
+        _saveShareButton.titleLabel.font = [UIFont systemFontOfSize:FontSize(14) weight:UIFontWeightMedium];
 
         // 添加右侧图标（虚线圈图）
         UIImage *icon = [UIImage imageNamed:@"CH_share_icon"];
@@ -278,7 +293,7 @@
 
         [_fullReportButton setTitle:@"查看完整报告" forState:UIControlStateNormal];
         [_fullReportButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-        _fullReportButton.titleLabel.font = [UIFont systemFontOfSize:14 weight:UIFontWeightMedium];
+        _fullReportButton.titleLabel.font = [UIFont systemFontOfSize:FontSize(14) weight:UIFontWeightMedium];
         [_fullReportButton addTarget:self action:@selector(jumpToFaceDetailVC) forControlEvents:UIControlEventTouchUpInside];
     }
     return _fullReportButton;

@@ -46,7 +46,7 @@
     
     
     self.titleLabel = [UILabel new];
-    self.titleLabel.font = [UIFont systemFontOfSize:11];
+    self.titleLabel.font = [UIFont systemFontOfSize:FontSize(11)];
     self.titleLabel.text = @"面部分析";
     [self.titleLabel sizeToFit];
     [self.viewsContainer addSubview:self.titleLabel];
@@ -61,7 +61,7 @@
     UILabel *summaryLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, self.viewsContainer.width - 32, 24)];
     [self.viewsContainer addSubview:summaryLabel];
     summaryLabel.text = [NSString stringWithFormat:@"%@+%@", tempModel.conclusionModel.fetchFaceStyleString, self.dataModel.faceFeatures];
-    summaryLabel.font = [UIFont boldSystemFontOfSize:14];
+    summaryLabel.font = [UIFont boldSystemFontOfSize:FontSize(14)];
     summaryLabel.textColor = [UIColor blackColor];
     [summaryLabel sizeToFit];
     summaryLabel.top = self.titleLabel.bottom + 3;
@@ -80,7 +80,7 @@
     UILabel *shapeTitleLabel = [[UILabel alloc] init];
     [bgContainer addSubview:shapeTitleLabel];
     shapeTitleLabel.text = @"1. 脸型与轮廓";
-    shapeTitleLabel.font = [UIFont systemFontOfSize:14 weight:UIFontWeightMedium];
+    shapeTitleLabel.font = [UIFont systemFontOfSize:FontSize(14) weight:UIFontWeightMedium];
     shapeTitleLabel.textColor = [UIColor colorWithHexString:@"#262626"];
     [shapeTitleLabel sizeToFit];
     shapeTitleLabel.top = 16;
@@ -119,7 +119,7 @@
     UILabel *shapeDetailLabel = [[UILabel alloc] init];
     [bgContainer addSubview:shapeDetailLabel];
     shapeDetailLabel.text = [NSString stringWithFormat:@"偏%@", tempModel.conclusionModel.fetchFaceStyleString];
-    shapeDetailLabel.font = [UIFont boldSystemFontOfSize:13];
+    shapeDetailLabel.font = [UIFont boldSystemFontOfSize:FontSize(13)];
     shapeDetailLabel.top = faceImage.top + 5;
     shapeDetailLabel.left = faceImage.right + 9;
     shapeDetailLabel.width = bgContainer.width - shapeDetailLabel.left - 16.5;
@@ -127,19 +127,33 @@
     
     UILabel *shapeDetailLabel2 = [[UILabel alloc] init];
     [bgContainer addSubview:shapeDetailLabel2];
-    shapeDetailLabel2.text = tempModel.conclusionModel.fetchFaceStyleConclusionString;
     shapeDetailLabel2.numberOfLines = 4;
-    shapeDetailLabel2.font = [UIFont systemFontOfSize:13];
     shapeDetailLabel2.top = shapeDetailLabel.bottom + 8;
     shapeDetailLabel2.left = faceImage.right + 9;
     shapeDetailLabel2.width = bgContainer.width - shapeDetailLabel2.left - 16.5;
+    
+    // 设置文本和行间距
+    NSString *detailText = tempModel.conclusionModel.fetchFaceStyleConclusionString;
+    if (detailText && detailText.length > 0) {
+        NSMutableAttributedString *attributedText = [[NSMutableAttributedString alloc] initWithString:detailText];
+        NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
+        paragraphStyle.lineSpacing = LineSpacing(3);
+        paragraphStyle.alignment = NSTextAlignmentLeft;
+        [attributedText addAttribute:NSParagraphStyleAttributeName value:paragraphStyle range:NSMakeRange(0, detailText.length)];
+        [attributedText addAttribute:NSFontAttributeName value:[UIFont systemFontOfSize:FontSize(13)] range:NSMakeRange(0, detailText.length)];
+        [attributedText addAttribute:NSForegroundColorAttributeName value:[UIColor colorWithHexString:@"#262626"] range:NSMakeRange(0, detailText.length)];
+        shapeDetailLabel2.attributedText = attributedText;
+    } else {
+        shapeDetailLabel2.text = detailText;
+        shapeDetailLabel2.font = [UIFont systemFontOfSize:FontSize(13)];
+    }
     [shapeDetailLabel2 sizeToFit];
 
     // 五官标题
     UILabel *featuresTitleLabel = [[UILabel alloc] init];
     [bgContainer addSubview:featuresTitleLabel];
     featuresTitleLabel.text = @"2. 五官特点";
-    featuresTitleLabel.font = [UIFont systemFontOfSize:14 weight:UIFontWeightMedium];
+    featuresTitleLabel.font = [UIFont systemFontOfSize:FontSize(14) weight:UIFontWeightMedium];
     featuresTitleLabel.textColor = [UIColor colorWithHexString:@"#262626"];
     [featuresTitleLabel sizeToFit];
     featuresTitleLabel.top = faceImage.bottom + 18;

@@ -27,7 +27,7 @@
     UILabel *titleLabel = [UILabel new];
     [self addSubview:titleLabel];
     titleLabel.text = tempModel.panelBDetailModel.makeupStrategyKeyString;
-    titleLabel.font = [UIFont systemFontOfSize:13 weight:UIFontWeightSemibold];
+    titleLabel.font = [UIFont systemFontOfSize:FontSize(13) weight:UIFontWeightSemibold];
     titleLabel.textColor = [UIColor colorWithHexString:@"#262626"];
     [titleLabel sizeToFit];
     titleLabel.centerY = containerView.centerY;
@@ -36,7 +36,7 @@
     CGFloat labelSpacing = 8.0;
     CGFloat currentY = titleLabel.bottom + 12;
     
-    UIFont *textFont = [UIFont systemFontOfSize:13];
+    UIFont *textFont = [UIFont systemFontOfSize:FontSize(13)];
     UIColor *textColor = [UIColor colorWithHexString:@"#333333"];
     NSArray *tempArr = tempModel.panelBDetailModel.makeupStrategyValueArray;
     for (NSInteger i = 0; i < tempArr.count; i++) {

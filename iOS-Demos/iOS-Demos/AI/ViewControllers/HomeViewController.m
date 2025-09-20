@@ -35,7 +35,7 @@
     NSLog(@"SafeAreaBottomHeight:%f", SafeAreaBottomHeight);
     CAGradientLayer *gradient = [CAGradientLayer layer];
     gradient.frame = self.view.bounds;
-    gradient.colors = @[(__bridge id)[UIColor colorWithRed:1 green:0.8 blue:0.9 alpha:1].CGColor,
+    gradient.colors = @[(__bridge id)[UIColor colorWithHexString:@"#FFEBFA"].CGColor,
                         (__bridge id)[UIColor whiteColor].CGColor];
     gradient.startPoint = CGPointMake(0.5, 0.0);
     gradient.endPoint = CGPointMake(0.5, 1.0);
@@ -43,8 +43,8 @@
     
     // 如果还有阴影图片：
     UIImageView *shadowImg = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"home_bg_cover"]];
-    shadowImg.width = self.view.width;
-    shadowImg.height = 330;
+    shadowImg.width = kScreenWidth;
+    shadowImg.height = 330 * kScreenRatio;
     shadowImg.contentMode = UIViewContentModeScaleAspectFill;
     [self.view addSubview:shadowImg];
 }
@@ -71,24 +71,24 @@
     // 构建带帧的 AnimatedImage
     SDAnimatedImage *animatedImage = [[SDAnimatedImage alloc] initWithData:data];
     self.centerImageView = [[SDAnimatedImageView alloc] initWithImage:animatedImage];
-    self.centerImageView.size = CGSizeMake(170, 170);
+    self.centerImageView.size = CGSizeMake(170 * kScreenRatio, 170 * kScreenRatio);
     self.centerImageView.centerX = self.view.width / 2.0;
     self.centerImageView.top = 222 * kScreenRatio;
-    self.centerImageView.center = CGPointMake(self.view.center.x, self.centerImageView.center.y);
+//    self.centerImageView.center = CGPointMake(self.view.center.x, self.centerImageView.center.y);
     [self.view addSubview:self.centerImageView];
 
     // 底部横排 item（用 stack 简单模拟）
     NSArray *icons = @[@"homt_bottom_1", @"homt_bottom_2", @"homt_bottom_3"];
     NSArray *strings = @[@"智能面部分析", @"精准妆容定制", @"明星脸型匹配"];
-    CGFloat iconSize = 40;
-    CGFloat spacing = (self.view.frame.size.width - 3 * iconSize) / 4;
+    CGFloat iconSize = 44;
+    CGFloat spacing = (kScreenWidth - 3 * iconSize) / 4;
     for (int i = 0; i < icons.count; i++) {
         UIImageView *img = [[UIImageView alloc] initWithImage:[UIImage imageNamed:icons[i]]];
         img.frame = CGRectMake(spacing + i * (iconSize + spacing), self.view.frame.size.height - (205 + iconSize), iconSize, iconSize);
         [self.view addSubview:img];
         UILabel *label = [UILabel new];
         label.text = strings[i];
-        label.font = [UIFont systemFontOfSize:12];
+        label.font = [UIFont systemFontOfSize:FontSize(12)];
         label.textColor = [UIColor colorWithHexString:@"#333333"];
         [label sizeToFit];
         label.centerX = img.centerX;
@@ -98,7 +98,7 @@
 
     // 测一测按钮
     self.mainButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    self.mainButton.frame = CGRectMake(40, self.view.frame.size.height - (105 + 58), self.view.frame.size.width - 80, 50);
+    self.mainButton.frame = CGRectMake(40, self.view.frame.size.height - (105 + 58), self.view.frame.size.width - 80, 58);
     [self.mainButton setTitle:@"测一测" forState:UIControlStateNormal];
     self.mainButton.backgroundColor = [UIColor blackColor];
     self.mainButton.titleLabel.font = [UIFont boldSystemFontOfSize:18];
@@ -107,11 +107,11 @@
     [self.view addSubview:self.mainButton];
     
     self.lastButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    self.lastButton.frame = CGRectMake(40, self.mainButton.bottom, self.view.frame.size.width - 80, 56);
+    self.lastButton.frame = CGRectMake(40, self.mainButton.bottom, self.view.frame.size.width - 80, 58);
     [self.lastButton setTitle:@"上次检测报告" forState:UIControlStateNormal];
     [self.lastButton setTitleColor:[UIColor colorWithHexString:@"#999999"] forState:UIControlStateNormal];
     self.lastButton.backgroundColor = UIColor.clearColor;
-    self.lastButton.titleLabel.font = [UIFont systemFontOfSize:13];
+    self.lastButton.titleLabel.font = [UIFont systemFontOfSize:FontSize(13)];
     [self.lastButton addTarget:self action:@selector(jumpConclusionVC) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:self.lastButton];
 }

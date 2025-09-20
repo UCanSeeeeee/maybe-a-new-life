@@ -22,13 +22,7 @@
         [self showNetworkAlert];
         return;
     }
-//    if (![GlobalToolHandler checkNetworkStatus]) {
-//        return;
-//    }
-//    if (![GlobalToolHandler requestWiFiPermission]) {
-//        return;
-//    }
-//    [GlobalToolHandler clearGlobalModel];
+    [GlobalToolHandler clearGlobalModel];
     TakePhotosViewController *vc = [TakePhotosViewController new];
     [self.navigationController pushViewController:vc animated:YES];
 }

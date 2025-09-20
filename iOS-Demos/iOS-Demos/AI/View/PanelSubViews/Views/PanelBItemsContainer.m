@@ -66,7 +66,7 @@
     [self addSubview:labelV1];
     labelV1.numberOfLines = 0;
     labelV1.textAlignment = NSTextAlignmentCenter;
-    labelV1.font = [UIFont systemFontOfSize:9];
+    labelV1.font = [UIFont systemFontOfSize:FontSize(9)];
     labelV1.textColor = [UIColor grayColor];
     labelV1.text = @"五\n官\n量\n感\n大";
     [labelV1 sizeToFit];
@@ -80,7 +80,7 @@
     [self addSubview:labelV2];
     labelV2.numberOfLines = 0;
     labelV2.textAlignment = NSTextAlignmentCenter;
-    labelV2.font = [UIFont systemFontOfSize:9];
+    labelV2.font = [UIFont systemFontOfSize:FontSize(9)];
     labelV2.textColor = [UIColor grayColor];
     labelV2.text = @"五\n官\n量\n感\n小";
     [labelV2 sizeToFit];
@@ -90,7 +90,7 @@
     UILabel *leftLabel = [[UILabel alloc] init];
     [self addSubview:leftLabel];
     leftLabel.text = @"曲线型";
-    leftLabel.font = [UIFont systemFontOfSize:9];
+    leftLabel.font = [UIFont systemFontOfSize:FontSize(9)];
     leftLabel.textColor = [UIColor grayColor];
     [leftLabel sizeToFit];
     leftLabel.left = self.bgImageView.left + 8;
@@ -99,7 +99,7 @@
     UILabel *rightLabel = [[UILabel alloc] init];
     [self addSubview:rightLabel];
     rightLabel.text = @"直线型";
-    rightLabel.font = [UIFont systemFontOfSize:9];
+    rightLabel.font = [UIFont systemFontOfSize:FontSize(9)];
     rightLabel.textAlignment = NSTextAlignmentRight;
     rightLabel.textColor = [UIColor grayColor];
     [rightLabel sizeToFit];

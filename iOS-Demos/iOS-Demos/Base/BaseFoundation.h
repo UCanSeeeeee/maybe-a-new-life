@@ -19,6 +19,12 @@
 #ifndef kScreenRatio
 #define kScreenRatio kScreenWidth / 375.0
 #endif
+
+// 字体大小适配宏
+#define FontSize(size) ((size) * kScreenRatio)
+
+// 行间距适配宏
+#define LineSpacing(spacing) ((spacing) * kScreenRatio)
 // 顶部安全区域高度（包含刘海或灵动岛）
 #define SafeAreaTopHeight ({\
     CGFloat topInset = 0;\

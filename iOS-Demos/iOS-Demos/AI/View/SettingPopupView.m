@@ -62,7 +62,7 @@
     // 标题
     UILabel *title = [[UILabel alloc] init];
     title.text = @"设置";
-    title.font = [UIFont boldSystemFontOfSize:17];
+    title.font = [UIFont boldSystemFontOfSize:FontSize(17)];
     [title sizeToFit];
     title.center = CGPointMake(self.containerView.bounds.size.width / 2, 30);
     [self.containerView addSubview:title];

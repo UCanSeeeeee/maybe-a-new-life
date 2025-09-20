@@ -46,7 +46,7 @@
     
     
     self.titleLabel = [UILabel new];
-    self.titleLabel.font = [UIFont systemFontOfSize:11];
+    self.titleLabel.font = [UIFont systemFontOfSize:FontSize(11)];
     self.titleLabel.text = @"妆容推荐";
     self.titleLabel.textColor = [UIColor colorWithHexString:@"#EB9731"];
     [self.titleLabel sizeToFit];
@@ -63,7 +63,7 @@
     UILabel *summaryLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, self.viewsContainer.width - 32, 24)];
     [self.viewsContainer addSubview:summaryLabel];
     summaryLabel.text = self.dataModel.recommandStyle;
-    summaryLabel.font = [UIFont boldSystemFontOfSize:14];
+    summaryLabel.font = [UIFont boldSystemFontOfSize:FontSize(14)];
     summaryLabel.textColor = [UIColor blackColor];
     [summaryLabel sizeToFit];
     summaryLabel.top = self.titleLabel.bottom + 3;
