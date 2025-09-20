@@ -8,6 +8,7 @@
 #import "ResultDetailController.h"
 #import "BaseFoundation.h"
 #import "PanelDSummary.h"
+#import <YYCategories/YYCategories.h>
 
 // MARK: - Constants
 static const CGFloat kBackButtonSize = 40.0;       // 返回按钮尺寸
@@ -152,7 +153,7 @@ typedef NS_ENUM(NSInteger, ResultSection) {
     self.detailPanelView = [InfoPanelView new];
     [self.scrollContentView addSubview:self.detailPanelView];
     [self.scrollContentView bringSubviewToFront:self.segmentedControlView];
-    [self.detailPanelView loadView];
+    [self.detailPanelView loadAndLayoutPanels];
     self.detailPanelView.top = self.segmentedControlView.bottom + kSectionSpacing;
 }
 
@@ -259,9 +260,9 @@ typedef NS_ENUM(NSInteger, ResultSection) {
         case ResultSectionFaceAnalysis:
             return 0;
         case ResultSectionStyleGuide:
-            return self.detailPanelView.styleView.top;
+            return self.detailPanelView.styleGuidePanel.top;
         case ResultSectionMakeupRecommend:
-            return self.detailPanelView.makeupView.top;
+            return self.detailPanelView.makeupRecommendPanel.top;
     }
 }
 
@@ -282,9 +283,9 @@ typedef NS_ENUM(NSInteger, ResultSection) {
 - (void)updateSegmentSelectionForScrollOffset:(CGFloat)offset {
     ResultSection targetSection = ResultSectionFaceAnalysis;
     
-    if (offset >= self.detailPanelView.makeupView.top) {
+    if (offset >= self.detailPanelView.makeupRecommendPanel.top) {
         targetSection = ResultSectionMakeupRecommend;
-    } else if (offset >= self.detailPanelView.styleView.top) {
+    } else if (offset >= self.detailPanelView.styleGuidePanel.top) {
         targetSection = ResultSectionStyleGuide;
     }
     

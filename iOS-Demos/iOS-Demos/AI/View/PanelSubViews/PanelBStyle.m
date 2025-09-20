@@ -58,7 +58,7 @@
     self.titleLabel.left = self.titleImageView.right + 3;
 }
 
-- (void)loadView {
+- (void)loadAndDisplayContent {
     GlobalModel *tempModel = GlobalToolHandler.fetchGlobalModel;
     self.dataModel = tempModel.panelBDetailModel;
     NSLog(@"chieh B %@", self.dataModel);
@@ -130,6 +130,5 @@
     self.viewsContainer.height = bgContainer.bottom + 4;
     self.size = self.viewsContainer.size;
 }
-
 
 @end

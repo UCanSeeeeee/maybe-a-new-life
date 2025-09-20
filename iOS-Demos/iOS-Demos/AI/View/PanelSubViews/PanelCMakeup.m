@@ -117,4 +117,9 @@
     self.size = self.viewsContainer.size;
 }
 
+// MARK: - Public Methods
+- (void)loadAndDisplayContent {
+    [self loadView]; // 调用原有实现
+}
+
 @end

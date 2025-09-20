@@ -8,44 +8,94 @@
 #import "InfoPanelView.h"
 #import "BaseFoundation.h"
 
-@interface InfoPanelView ()
+// MARK: - Constants
+static const CGFloat kPanelVerticalSpacing = 10.0;  // 面板间垂直间距
+static const CGFloat kInitialContainerHeight = 1000.0;  // 初始容器高度
 
+@interface InfoPanelView ()
 
 @end
 
 @implementation InfoPanelView
 
-- (instancetype)initWithFrame:(CGRect)frame
-{
+// MARK: - Lifecycle
+- (instancetype)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
-        self.width = kScreenWidth;
-        self.height = 1000;
-        [self setupSubviews];
+        [self setupInitialLayout];
+        [self setupSubPanels];
     }
     return self;
 }
 
-- (void)setupSubviews {
-    self.faceView = [PanelAFace new];
-    [self addSubview:self.faceView];
-    self.styleView = [PanelBStyle new];
-    [self addSubview:self.styleView];
-    self.makeupView = [PanelCMakeup new];
-    [self addSubview:self.makeupView];
+// MARK: - Setup Methods
+- (void)setupInitialLayout {
+    self.width = kScreenWidth;
+    self.height = kInitialContainerHeight;
 }
 
-- (void)loadView {
-    [self.faceView loadView];
-    self.faceView.centerX = self.width / 2.0;
-    [self.styleView loadView];
-    self.styleView.top = self.faceView.bottom + 10;
-    self.styleView.centerX = self.width / 2.0;
-    [self.makeupView loadView];
-    self.makeupView.top = self.styleView.bottom + 10;
-    self.makeupView.centerX = self.width / 2.0;
-    self.height = self.makeupView.bottom + SafeAreaBottomHeight;
+- (void)setupSubPanels {
+    // 创建面部分析面板
+    self.faceAnalysisPanel = [PanelAFace new];
+    [self addSubview:self.faceAnalysisPanel];
     
+    // 创建风格定位面板
+    self.styleGuidePanel = [PanelBStyle new];
+    [self addSubview:self.styleGuidePanel];
+    
+    // 创建妆容推荐面板
+    self.makeupRecommendPanel = [PanelCMakeup new];
+    [self addSubview:self.makeupRecommendPanel];
+}
+
+// MARK: - Public Methods
+- (void)loadAndLayoutPanels {
+    [self loadFaceAnalysisPanel];
+    [self loadStyleGuidePanel];
+    [self loadMakeupRecommendPanel];
+    [self updateContainerHeight];
+}
+
+// MARK: - Private Methods
+- (void)loadFaceAnalysisPanel {
+    [self.faceAnalysisPanel loadAndDisplayContent];
+    self.faceAnalysisPanel.centerX = self.width / 2.0;
+    self.faceAnalysisPanel.top = 0;
+}
+
+- (void)loadStyleGuidePanel {
+    [self.styleGuidePanel loadAndDisplayContent];
+    self.styleGuidePanel.centerX = self.width / 2.0;
+    self.styleGuidePanel.top = self.faceAnalysisPanel.bottom + kPanelVerticalSpacing;
+}
+
+- (void)loadMakeupRecommendPanel {
+    [self.makeupRecommendPanel loadAndDisplayContent];
+    self.makeupRecommendPanel.centerX = self.width / 2.0;
+    self.makeupRecommendPanel.top = self.styleGuidePanel.bottom + kPanelVerticalSpacing;
+}
+
+- (void)updateContainerHeight {
+    self.height = self.makeupRecommendPanel.bottom + SafeAreaBottomHeight;
+}
+
+// MARK: - Deprecated Methods
+- (void)loadView {
+    // 为了保持向后兼容性，调用新方法
+    [self loadAndLayoutPanels];
+}
+
+// MARK: - Legacy Property Getters (for backward compatibility)
+- (PanelAFace *)faceView {
+    return self.faceAnalysisPanel;
+}
+
+- (PanelBStyle *)styleView {
+    return self.styleGuidePanel;
+}
+
+- (PanelCMakeup *)makeupView {
+    return self.makeupRecommendPanel;
 }
 
 @end

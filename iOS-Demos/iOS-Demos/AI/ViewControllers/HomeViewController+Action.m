@@ -13,7 +13,7 @@
 @implementation HomeViewController (Action)
 
 - (void)showSettingPopup {
-    [SettingPopupView showInView:self.view];
+    [SettingPopupView showInParentView:self.view];
 }
 
 - (void)takePhotosVC {

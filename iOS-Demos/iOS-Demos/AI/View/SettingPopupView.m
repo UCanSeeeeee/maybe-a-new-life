@@ -10,214 +10,325 @@
 #import "BaseFoundation.h"
 #import <MessageUI/MessageUI.h>
 
+// MARK: - Constants
+static const CGFloat kAnimationDuration = 0.25;           // 动画时长
+static const CGFloat kBackgroundAlpha = 0.4;              // 背景透明度
+static const CGFloat kContainerCornerRadius = 20.0;       // 容器圆角
+static const CGFloat kTitleTopMargin = 30.0;              // 标题顶部边距
+static const CGFloat kTopSpacing = 61.0;                  // 顶部间距
+static const CGFloat kBottomSpacing = 56.0;               // 底部间距
+static const CGFloat kTableViewHeight = 420.0;            // 表格视图高度
+static const CGFloat kCellHeight = 55.0;                  // 单元格高度
+
+// MARK: - External URLs
+static NSString * const kAppStoreURL = @"itms-apps://itunes.apple.com/app/id123456789";
+static NSString * const kRedBookURL = @"xhsdiscover://user/63280d7800000000230254b8";
+static NSString * const kFeedbackEmail = @"chieh504@qq.com";
+
 @interface SettingPopupView () <UITableViewDelegate, UITableViewDataSource, MFMailComposeViewControllerDelegate>
-@property (nonatomic, strong) UIView *containerView;
-@property (nonatomic, strong) UIView *backgroundView;
-@property (nonatomic, strong) UITableView *tableView;
-@property (nonatomic, strong) NSArray<NSArray<SettingItemModel *> *> *dataSource;
+
+// MARK: - UI Components
+@property (nonatomic, strong) UIView *popupContainer;      // 弹窗容器
+@property (nonatomic, strong) UIView *maskBackground;      // 蒙层背景
+@property (nonatomic, strong) UITableView *settingsTable; // 设置表格
+@property (nonatomic, strong) UILabel *titleLabel;        // 标题标签
+
+// MARK: - Data
+@property (nonatomic, strong) NSArray<NSArray<SettingItemModel *> *> *settingSections; // 设置项数据
+
 @end
 
 @implementation SettingPopupView
 
-+ (void)showInView:(UIView *)parentView {
+// MARK: - Class Methods
++ (void)showInParentView:(UIView *)parentView {
     SettingPopupView *popupView = [[SettingPopupView alloc] initWithFrame:parentView.bounds];
     [parentView addSubview:popupView];
-    [UIView animateWithDuration:0.25 animations:^{
-        popupView.backgroundView.alpha = 1.0;
-        popupView.containerView.transform = CGAffineTransformIdentity;
-    }];
+    [popupView showWithAnimation];
 }
 
+// MARK: - Lifecycle
 - (instancetype)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
-        [self setupData];
-        [self setupUI];
-        // 点击背景关闭
-        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleBackgroundTap:)];
-        [self.backgroundView addGestureRecognizer:tap];
+        [self setupSettingItems];
+        [self setupUserInterface];
+        [self setupGestureRecognizers];
     }
     return self;
 }
 
-- (void)setupUI {
-    // 背景蒙层
-    self.backgroundView = [[UIView alloc] initWithFrame:self.bounds];
-    self.backgroundView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.4];
-    self.backgroundView.alpha = 0;
-    [self addSubview:self.backgroundView];
-    
-    // 底部弹窗容器
-    CGFloat topSpacing = 61;
-    CGFloat bottomSpacing = 56;
-    CGFloat containerHeight = 385 + 35 + topSpacing + bottomSpacing;
-    
-    self.containerView = [[UIView alloc] initWithFrame:CGRectMake(0, self.frame.size.height - containerHeight, self.frame.size.width, containerHeight)];
-    self.containerView.backgroundColor = [UIColor colorWithHexString:@"#F9F9F9"];
-    self.containerView.layer.cornerRadius = 20;
-    self.containerView.layer.maskedCorners = kCALayerMinXMinYCorner | kCALayerMaxXMinYCorner;
-    self.containerView.transform = CGAffineTransformMakeTranslation(0, containerHeight);
-    [self addSubview:self.containerView];
-    
-    // 标题
-    UILabel *title = [[UILabel alloc] init];
-    title.text = @"设置";
-    title.font = [UIFont boldSystemFontOfSize:FontSize(17)];
-    [title sizeToFit];
-    title.center = CGPointMake(self.containerView.bounds.size.width / 2, 30);
-    [self.containerView addSubview:title];
-    
-    // 设置表格
-    self.tableView = [[UITableView alloc] initWithFrame:CGRectMake(0, topSpacing, self.containerView.frame.size.width, 385 + 35) style:UITableViewStyleInsetGrouped];
-    self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
-    self.tableView.delegate = self;
-    self.tableView.backgroundColor = UIColor.clearColor;
-    self.tableView.dataSource = self;
-    [self.containerView addSubview:self.tableView];
-}
-
-- (void)dismiss {
-//    [self removeFromSuperview];
-    [UIView animateWithDuration:0.25 animations:^{
-        self.backgroundView.alpha = 0;
-        self.containerView.transform = CGAffineTransformMakeTranslation(0, self.containerView.frame.size.height);
+// MARK: - Public Methods
+- (void)dismissWithAnimation {
+    [UIView animateWithDuration:kAnimationDuration animations:^{
+        self.maskBackground.alpha = 0;
+        self.popupContainer.transform = CGAffineTransformMakeTranslation(0, self.popupContainer.frame.size.height);
     } completion:^(BOOL finished) {
         [self removeFromSuperview];
     }];
 }
 
-#pragma mark - TableView DataSource & Delegate
+// MARK: - Private Methods
+- (void)showWithAnimation {
+    [UIView animateWithDuration:kAnimationDuration animations:^{
+        self.maskBackground.alpha = 1.0;
+        self.popupContainer.transform = CGAffineTransformIdentity;
+    }];
+}
 
+- (void)setupGestureRecognizers {
+    UITapGestureRecognizer *backgroundTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleBackgroundTap:)];
+    [self.maskBackground addGestureRecognizer:backgroundTap];
+}
+
+- (void)setupUserInterface {
+    [self setupMaskBackground];
+    [self setupPopupContainer];
+    [self setupTitleLabel];
+    [self setupSettingsTable];
+}
+
+- (void)setupMaskBackground {
+    self.maskBackground = [[UIView alloc] initWithFrame:self.bounds];
+    self.maskBackground.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:kBackgroundAlpha];
+    self.maskBackground.alpha = 0;
+    [self addSubview:self.maskBackground];
+}
+
+- (void)setupPopupContainer {
+    CGFloat containerHeight = kTableViewHeight + kTopSpacing + kBottomSpacing;
+    CGRect containerFrame = CGRectMake(0, 
+                                     self.frame.size.height - containerHeight, 
+                                     self.frame.size.width, 
+                                     containerHeight);
+    
+    self.popupContainer = [[UIView alloc] initWithFrame:containerFrame];
+    self.popupContainer.backgroundColor = [UIColor colorWithHexString:@"#F9F9F9"];
+    self.popupContainer.layer.cornerRadius = kContainerCornerRadius;
+    self.popupContainer.layer.maskedCorners = kCALayerMinXMinYCorner | kCALayerMaxXMinYCorner;
+    self.popupContainer.transform = CGAffineTransformMakeTranslation(0, containerHeight);
+    [self addSubview:self.popupContainer];
+}
+
+- (void)setupTitleLabel {
+    self.titleLabel = [[UILabel alloc] init];
+    self.titleLabel.text = @"设置";
+    self.titleLabel.font = [UIFont boldSystemFontOfSize:FontSize(17)];
+    self.titleLabel.textColor = [UIColor blackColor];
+    self.titleLabel.textAlignment = NSTextAlignmentCenter;
+    [self.titleLabel sizeToFit];
+    self.titleLabel.center = CGPointMake(self.popupContainer.bounds.size.width / 2, kTitleTopMargin);
+    [self.popupContainer addSubview:self.titleLabel];
+}
+
+- (void)setupSettingsTable {
+    CGRect tableFrame = CGRectMake(0, kTopSpacing, self.popupContainer.frame.size.width, kTableViewHeight);
+    self.settingsTable = [[UITableView alloc] initWithFrame:tableFrame style:UITableViewStyleInsetGrouped];
+    self.settingsTable.separatorStyle = UITableViewCellSeparatorStyleNone;
+    self.settingsTable.backgroundColor = UIColor.clearColor;
+    self.settingsTable.delegate = self;
+    self.settingsTable.dataSource = self;
+    self.settingsTable.showsVerticalScrollIndicator = NO;
+    [self.popupContainer addSubview:self.settingsTable];
+}
+
+// MARK: - UITableViewDataSource
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    return self.dataSource.count;
+    return self.settingSections.count;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return self.dataSource[section].count;
+    return self.settingSections[section].count;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    static NSString *identifier = @"SettingCell";
+    static NSString *identifier = @"SettingTableViewCell";
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:identifier];
     if (!cell) {
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:identifier];
         cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+        cell.textLabel.font = [UIFont systemFontOfSize:FontSize(16)];
+        cell.textLabel.textColor = [UIColor blackColor];
     }
     
-    SettingItemModel *item = self.dataSource[indexPath.section][indexPath.row];
-    cell.textLabel.text = item.title;
-    cell.imageView.image = [UIImage imageNamed:item.iconName];
+    SettingItemModel *settingItem = self.settingSections[indexPath.section][indexPath.row];
+    cell.textLabel.text = settingItem.title;
+    cell.imageView.image = [UIImage imageNamed:settingItem.iconName];
     return cell;
 }
 
+// MARK: - UITableViewDelegate
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-    NSLog(@"fuck u");
-    SettingItemModel *item = self.dataSource[indexPath.section][indexPath.row];
-    if (item.actionBlock) {
-        item.actionBlock();
-    }
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    
+    SettingItemModel *settingItem = self.settingSections[indexPath.section][indexPath.row];
+    if (settingItem.actionBlock) {
+        settingItem.actionBlock();
+    }
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
-    return 55;
+    return kCellHeight;
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
-    return section == 0 ? 0 : 0;
+    return 0.01;
 }
 
 - (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section {
-    UIView *header = [[UIView alloc] init];
-    header.backgroundColor = [UIColor clearColor];
-    return header;
+    UIView *headerView = [[UIView alloc] init];
+    headerView.backgroundColor = [UIColor clearColor];
+    return headerView;
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section {
     return 0.01;
 }
 
-#pragma mark - Data Setup
-
-- (void)setupData {
+// MARK: - Data Setup
+- (void)setupSettingItems {
     __weak typeof(self) weakSelf = self;
     
-    SettingItemModel *item1 = [self itemWithTitle:@"给我们好评" icon:@"setting_page_star" action:^{
-        NSLog(@"fuck u 1");
-        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"itms-apps://itunes.apple.com/app/id123456789"] options:@{} completionHandler:nil];
+    // 第一组：社交互动相关
+    SettingItemModel *rateAppItem = [self createSettingItemWithTitle:@"给我们好评" 
+                                                                 icon:@"setting_page_star" 
+                                                               action:^{
+        [weakSelf openAppStoreForRating];
     }];
     
-    SettingItemModel *item2 = [self itemWithTitle:@"意见反馈" icon:@"setting_page_mail" action:^{
-        NSLog(@"fuck u 2");
-        if ([MFMailComposeViewController canSendMail]) {
-            MFMailComposeViewController *mailVC = [[MFMailComposeViewController alloc] init];
-            mailVC.mailComposeDelegate = self;
-
-            [mailVC setSubject:@"chieh"];
-            [mailVC setToRecipients:@[@"chieh504@qq.com"]]; // 收件人
-            [mailVC setMessageBody:@"hello" isHTML:NO];
-            [[UIApplication sharedApplication].windows.firstObject.rootViewController presentViewController:mailVC animated:YES completion:nil];
-        } else {
-            NSURL *url = [NSURL URLWithString:@"mailto:chieh504@qq.com"];
-            if ([[UIApplication sharedApplication] canOpenURL:url]) {
-                [[UIApplication sharedApplication] openURL:url options:@{} completionHandler:nil];
-            }
-        }
-        // 跳转反馈页面
-//        [weakSelf.navigationController pushViewController:[FeedbackViewController new] animated:YES];
+    SettingItemModel *feedbackItem = [self createSettingItemWithTitle:@"意见反馈" 
+                                                                  icon:@"setting_page_mail" 
+                                                                action:^{
+        [weakSelf showFeedbackOptions];
     }];
     
-    SettingItemModel *item3 = [self itemWithTitle:@"关注我们" icon:@"setting_page_redbook" action:^{
-        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"xhsdiscover://user/63280d7800000000230254b8"] options:@{} completionHandler:nil];
-        // 展示二维码页面
-//        [weakSelf showQRCode];
+    SettingItemModel *followUsItem = [self createSettingItemWithTitle:@"关注我们" 
+                                                                  icon:@"setting_page_redbook" 
+                                                                action:^{
+        [weakSelf openRedBookProfile];
     }];
     
-    SettingItemModel *item4 = [self itemWithTitle:@"加入微信群" icon:@"setting_page_wechat" action:^{
-        // 展示微信群弹窗
-//        [weakSelf showWeChatGroupAlert];
+    SettingItemModel *wechatGroupItem = [self createSettingItemWithTitle:@"加入微信群" 
+                                                                     icon:@"setting_page_wechat" 
+                                                                   action:^{
+        [weakSelf showWeChatGroupInfo];
     }];
     
-    SettingItemModel *item5 = [self itemWithTitle:@"隐私政策" icon:@"setting_page_secret" action:^{
-//        [weakSelf openWebViewWithURL:@"https://xxx.com/privacy"];
+    // 第二组：法律条款相关
+    SettingItemModel *privacyPolicyItem = [self createSettingItemWithTitle:@"隐私政策" 
+                                                                       icon:@"setting_page_secret" 
+                                                                     action:^{
+        [weakSelf openPrivacyPolicy];
     }];
     
-    SettingItemModel *item6 = [self itemWithTitle:@"使用协议" icon:@"setting_page_license" action:^{
-//        [weakSelf openWebViewWithURL:@"https://xxx.com/agreement"];
+    SettingItemModel *termsOfServiceItem = [self createSettingItemWithTitle:@"使用协议" 
+                                                                        icon:@"setting_page_license" 
+                                                                      action:^{
+        [weakSelf openTermsOfService];
     }];
     
-    SettingItemModel *item7 = [self itemWithTitle:@"退出登录" icon:@"setting_page_sigh_out" action:^{
-//        [weakSelf handleLogout];
+    // 第三组：账户相关
+    SettingItemModel *logoutItem = [self createSettingItemWithTitle:@"退出登录" 
+                                                                icon:@"setting_page_sigh_out" 
+                                                              action:^{
+        [weakSelf handleLogout];
     }];
     
-    self.dataSource = @[
-        @[item1, item2, item3, item4],
-        @[item5, item6],
-        @[item7]
+    self.settingSections = @[
+        @[rateAppItem, feedbackItem, followUsItem, wechatGroupItem],
+        @[privacyPolicyItem, termsOfServiceItem],
+        @[logoutItem]
     ];
 }
 
+// MARK: - Helper Methods
+- (SettingItemModel *)createSettingItemWithTitle:(NSString *)title icon:(NSString *)iconName action:(void(^)(void))actionBlock {
+    SettingItemModel *settingItem = [[SettingItemModel alloc] init];
+    settingItem.title = title;
+    settingItem.iconName = iconName;
+    settingItem.actionBlock = actionBlock;
+    return settingItem;
+}
+
+- (void)handleBackgroundTap:(UITapGestureRecognizer *)gesture {
+    CGPoint tapLocation = [gesture locationInView:self];
+    if (!CGRectContainsPoint(self.popupContainer.frame, tapLocation)) {
+        [self dismissWithAnimation];
+    }
+}
+
+// MARK: - Action Handlers
+- (void)openAppStoreForRating {
+    NSURL *appStoreURL = [NSURL URLWithString:kAppStoreURL];
+    [[UIApplication sharedApplication] openURL:appStoreURL options:@{} completionHandler:nil];
+}
+
+- (void)showFeedbackOptions {
+    if ([MFMailComposeViewController canSendMail]) {
+        [self presentMailComposer];
+    } else {
+        [self openMailApp];
+    }
+}
+
+- (void)presentMailComposer {
+    MFMailComposeViewController *mailComposer = [[MFMailComposeViewController alloc] init];
+    mailComposer.mailComposeDelegate = self;
+    [mailComposer setSubject:@"应用反馈"];
+    [mailComposer setToRecipients:@[kFeedbackEmail]];
+    [mailComposer setMessageBody:@"请在此输入您的反馈内容..." isHTML:NO];
+    
+    UIViewController *rootViewController = [UIApplication sharedApplication].windows.firstObject.rootViewController;
+    [rootViewController presentViewController:mailComposer animated:YES completion:nil];
+}
+
+- (void)openMailApp {
+    NSString *mailURLString = [NSString stringWithFormat:@"mailto:%@", kFeedbackEmail];
+    NSURL *mailURL = [NSURL URLWithString:mailURLString];
+    if ([[UIApplication sharedApplication] canOpenURL:mailURL]) {
+        [[UIApplication sharedApplication] openURL:mailURL options:@{} completionHandler:nil];
+    }
+}
+
+- (void)openRedBookProfile {
+    NSURL *redBookURL = [NSURL URLWithString:kRedBookURL];
+    [[UIApplication sharedApplication] openURL:redBookURL options:@{} completionHandler:nil];
+}
+
+- (void)showWeChatGroupInfo {
+    // TODO: 实现微信群信息展示
+    NSLog(@"显示微信群信息");
+}
+
+- (void)openPrivacyPolicy {
+    // TODO: 实现隐私政策页面跳转
+    NSLog(@"打开隐私政策");
+}
+
+- (void)openTermsOfService {
+    // TODO: 实现使用协议页面跳转
+    NSLog(@"打开使用协议");
+}
+
+- (void)handleLogout {
+    // TODO: 实现退出登录逻辑
+    NSLog(@"处理退出登录");
+}
+
+// MARK: - MFMailComposeViewControllerDelegate
 - (void)mailComposeController:(MFMailComposeViewController *)controller
           didFinishWithResult:(MFMailComposeResult)result
                         error:(NSError *)error {
     [controller dismissViewControllerAnimated:YES completion:nil];
 }
 
-- (SettingItemModel *)itemWithTitle:(NSString *)title icon:(NSString *)icon action:(void(^)(void))action {
-    SettingItemModel *item = [[SettingItemModel alloc] init];
-    item.title = title;
-    item.iconName = icon;
-    item.actionBlock = action;
-    return item;
+// MARK: - Legacy Methods (for backward compatibility)
+- (void)dismiss {
+    [self dismissWithAnimation];
 }
 
-
-// 然后添加这个方法:
-- (void)handleBackgroundTap:(UITapGestureRecognizer *)gesture {
-    CGPoint location = [gesture locationInView:self];
-    if (!CGRectContainsPoint(self.containerView.frame, location)) {
-        [self dismiss];
-    }
++ (void)showInView:(UIView *)parentView {
+    [self showInParentView:parentView];
 }
 
 @end
